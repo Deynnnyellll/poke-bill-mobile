@@ -1,6 +1,6 @@
-# Welcome to your Expo app 👋
+# Bill Splitter (Pokémon-themed) 👋
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+A bill-splitting app styled like a Pokémon-game encounter: a typewriter-effect dialog box, badges, and a step-by-step "party" flow guide you through logging a bill and splitting it between trainers (people). Built with [Expo](https://expo.dev) and Expo Router.
 
 ## Get started
 
@@ -21,36 +21,39 @@ In the output, you'll find options to open the app in a
 - [development build](https://docs.expo.dev/develop/development-builds/introduction/)
 - [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
 - [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
+- Web browser (`npm run web`)
 - [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+## App flow
 
-## Get a fresh project
+- **Home** (`src/app/index.jsx`) — encounter/splash screen introducing the Bill Splitter.
+- **Party** (`src/app/party.jsx`) — add the people ("party members") splitting the bill; each member is assigned a Pokémon-type color badge.
+- **Log** (`src/app/log.jsx`) — log the items/amounts on the bill.
+- **Explore** (`src/app/explore.tsx`) — secondary tab.
 
-When you're ready, run:
+Shared UI pieces live in `src/components/` (`screen-header.jsx`, `screen-footer.jsx`), the Pokémon color/typography palette is in `src/constants/pokemon-theme.ts`, and the dialog-box typing effect is powered by the `useTyper` hook (`src/hooks/useTyper.jsx`).
 
-```bash
-npm run reset-project
-```
+## Project structure
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+This project uses [file-based routing](https://docs.expo.dev/router/introduction) rooted at `src/app`. Per this project's conventions:
 
-### Other setup steps
+- New route files are authored as `.jsx` (not `.tsx`); existing `.tsx` files don't need to be converted.
+- Platform-specific behavior uses Expo/Metro's extension resolution (e.g. `app-tabs.tsx` vs `app-tabs.web.tsx`).
+- Path alias `@/*` maps to `src/*`, and `@/assets/*` maps to `assets/`.
 
-- To set up ESLint for linting, run `npx expo lint`, or follow our guide on ["Using ESLint and Prettier"](https://docs.expo.dev/guides/using-eslint/)
-- If you'd like to set up unit testing, follow our guide on ["Unit Testing with Jest"](https://docs.expo.dev/develop/unit-testing/)
-- Learn more about the TypeScript setup in this template in our guide on ["Using TypeScript"](https://docs.expo.dev/guides/typescript/)
+See `AGENTS.md` and `CLAUDE.md` for more detailed conventions used when developing this project with AI coding agents.
+
+## Other setup steps
+
+- To set up ESLint for linting, run `npm run lint` (`expo lint`), or follow the guide on ["Using ESLint and Prettier"](https://docs.expo.dev/guides/using-eslint/).
+- If you'd like to set up unit testing, follow the guide on ["Unit Testing with Jest"](https://docs.expo.dev/develop/unit-testing/) — there is no configured test runner in this repo yet.
+- Learn more about the TypeScript setup in this template in the guide on ["Using TypeScript"](https://docs.expo.dev/guides/typescript/).
 
 ## Learn more
 
-To learn more about developing your project with Expo, look at the following resources:
+To learn more about developing with Expo, look at the following resources:
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
+- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with the [guides](https://docs.expo.dev/guides).
 - [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
 
-## Join the community
-
-Join our community of developers creating universal apps.
-
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+**Note:** This project targets Expo SDK ~57. Expo's APIs change frequently between versions — check the versioned docs at https://docs.expo.dev/versions/v57.0.0/ before relying on remembered patterns.
