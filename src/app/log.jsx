@@ -7,7 +7,7 @@ import ScreenFooter from '@/components/screen-footer';
 import ScreenHeader from '@/components/screen-header';
 import { PokemonColors, PokemonTypography } from '@/constants/pokemon-theme';
 
-export default function PartyScreen() {
+export default function LogScreen() {
   const router = useRouter();
   
   const DIALOG_TEXT = "How should we log what you bought?";
@@ -19,7 +19,7 @@ export default function PartyScreen() {
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.card}>
         <ScreenHeader
-          eyebrow="STEP 1 / 6"
+          eyebrow="STEP 2 / 6"
           eyebrowMuted="BILL NOT LOGGED YET"
           title="Who's in the party?"
           currentStep={2}
@@ -57,6 +57,7 @@ export default function PartyScreen() {
         <ScreenFooter
           nextLabel="Next"
           onBack={() => router.back()}
+          onNext={() => router.push("/item")}
         />
       </View>
     </SafeAreaView>

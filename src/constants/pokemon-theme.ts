@@ -13,6 +13,7 @@ export const PokemonColors = {
   hintText: '#9A9EA8',
   bodyText: '#2A2A2A',
   stepActive: '#E4554F',
+  darkContainer: "#20303C",
   stepLine: 'rgba(255, 255, 255, 0.35)',
   stepInactiveBorder: 'rgba(255, 255, 255, 0.5)',
   stepInactiveText: 'rgba(255, 255, 255, 0.7)',
