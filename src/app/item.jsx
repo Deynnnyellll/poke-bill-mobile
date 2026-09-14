@@ -1,6 +1,7 @@
+import { AppContext } from '@/context/context';
 import useTyper from '@/hooks/useTyper';
 import { useRouter } from 'expo-router';
-import { useState } from 'react';
+import { useContext, useState } from 'react';
 import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -8,12 +9,16 @@ import ScreenFooter from '@/components/screen-footer';
 import ScreenHeader from '@/components/screen-header';
 import { PokemonColors } from '@/constants/pokemon-theme';
 
+import Modal from '@/components/modal';
+
 
 export default function ItemScreen() {
   const router = useRouter();
   const [itemName, setItemName] = useState('');
   const [price, setPrice] = useState('');
-  const [items, setItems] = useState([]);
+  const [isModal, setIsModal] = useState(false);
+  
+  const { items, setItems } = useContext(AppContext);
 
   const DIALOG_TEXT = "Add every line on the bill. Prices get split next.";
   const TYPE_SPEED_MS = 30;
@@ -44,10 +49,10 @@ export default function ItemScreen() {
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.card}>
         <ScreenHeader
-          eyebrow="STEP 3 / 6"
+          eyebrow="STEP 2 / 5"
           eyebrowMuted={items.length === 0 ? "BILL NOT LOGGED YET" : `P${getTotal().toFixed(0)} Bill`}
           title="What did we get?"
-          currentStep={3}
+          currentStep={2}
         />
 
         <View style={styles.dialogBox}>
@@ -110,10 +115,12 @@ export default function ItemScreen() {
 
         <ScreenFooter
           nextLabel="Next"
-          onNext={() => router.push('/log')}
+          onNext={items.length === 0 ? () => setIsModal(prev => !prev) : () => router.push('/assign')}
           onBack={() => router.back()}
         />
       </View>
+
+      <Modal text={"Please enter items"} isModal={isModal} closeModal={() => setIsModal(prev => !prev)} />
     </SafeAreaView>
   );
 }

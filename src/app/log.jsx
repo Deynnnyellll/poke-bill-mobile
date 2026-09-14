@@ -19,7 +19,7 @@ export default function LogScreen() {
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.card}>
         <ScreenHeader
-          eyebrow="STEP 2 / 6"
+          eyebrow="STEP 2 / 5"
           eyebrowMuted="BILL NOT LOGGED YET"
           title="Who's in the party?"
           currentStep={2}

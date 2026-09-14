@@ -53,7 +53,7 @@ export default function HomeScreen() {
             ))}
           </View>
 
-          <Text style={styles.metaText}>3 trainers · 6 steps</Text>
+          <Text style={styles.metaText}>3 types · 5 steps</Text>
         </View>
 
         <ScreenFooter

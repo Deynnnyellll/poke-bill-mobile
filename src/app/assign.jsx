@@ -2,53 +2,42 @@ import { AppContext } from '@/context/context';
 import useTyper from '@/hooks/useTyper';
 import { useRouter } from 'expo-router';
 import { useContext, useState } from 'react';
-import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import ScreenFooter from '@/components/screen-footer';
 import ScreenHeader from '@/components/screen-header';
-
-import Modal from '@/components/modal';
 import { PokemonColors } from '@/constants/pokemon-theme';
 
-const MEMBER_TYPES = [
-  { label: 'Grass', bg: '#B7E4B0', border: '#4C9A4C', text: '#2F6B2F' },
-  { label: 'Fire', bg: '#F5A3A0', border: '#C1524C', text: '#8A2F2A' },
-  { label: 'Water', bg: '#A9D9F2', border: '#3E82AE', text: '#2A5A78' },
-];
+import Modal from '@/components/modal';
 
-export default function PartyScreen() {
+export default function ItemScreen() {
   const router = useRouter();
-  const [name, setName] = useState('');
+  
   const { members, setMembers } = useContext(AppContext);
+  const [isFunder, setIsFunder] = useState(null);
   const [isModal, setIsModal] = useState(false);
 
-  const DIALOG_TEXT = "Who's in the party? Everyone gets a type colour.";
+  const DIALOG_TEXT = "Did anyone front the cash for the table?";
   const TYPE_SPEED_MS = 30;
 
   const typeDialogText = useTyper(DIALOG_TEXT, TYPE_SPEED_MS);
 
-  const addMember = () => {
-    const trimmed = name.trim();
-    if (!trimmed) return;
+  const handleFunder = (id) => {
+    if(isFunder) {
+      setMembers((prev) => prev.map(item => item.id === id ? {...item, isFunder: true} : {...item, isFunder: false}))
+    }
+  }
 
-    const type = MEMBER_TYPES[members.length % MEMBER_TYPES.length];
-    setMembers((prev) => [...prev, { id: `${Date.now()}-${prev.length}`, name: trimmed, type }]);
-    setName('');
-  };
-
-  const removeMember = (id) => {
-    setMembers((prev) => prev.filter((member) => member.id !== id));
-  };
 
   return (
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.card}>
         <ScreenHeader
-          eyebrow="STEP 1 / 5"
+          eyebrow="STEP 3 / 5"
           eyebrowMuted="BILL NOT LOGGED YET"
-          title="Who's in the party?"
-          currentStep={1}
+          title="Who frontend the cash?"
+          currentStep={3}
         />
 
         <View style={styles.dialogBox}>
@@ -57,32 +46,29 @@ export default function PartyScreen() {
         </View>
 
         <View style={styles.content}>
-          <View style={styles.inputRow}>
-            <TextInput
-              style={styles.input}
-              value={name}
-              onChangeText={setName}
-              placeholder="Enter name..."
-              placeholderTextColor="#9A9EA8"
-              returnKeyType="done"
-              onSubmitEditing={addMember}
-            />
+          <View style={styles.optionRow}>
             <Pressable
-              onPress={addMember}
-              style={({ pressed }) => [styles.addButton, pressed && styles.pressed]}>
-              <Text style={styles.addButtonText}>+</Text>
+              onPress={() => setIsFunder(true)}
+              style={[styles.option, isFunder === true ? styles.pressed : styles.notPressed]}>
+              <Text style={styles.optionText}>One Person Paid</Text>
+            </Pressable>
+
+            <Pressable
+              onPress={() => setIsFunder(false)}
+              style={[styles.option, isFunder === false ? styles.pressed : styles.notPressed]}>
+              <Text style={styles.optionText}>Split Evenly</Text>
             </Pressable>
           </View>
 
-          <Text style={styles.metaText}>PARTY · {members.length} MEMBERS</Text>
+          <Text style={styles.metaText}>PICK THE FUNDER</Text>
 
           <View style={styles.memberList}>
             {members.map((member, index) => (
-              <View key={member.id} style={styles.memberRow}>
+              <Pressable key={member.id} style={({ pressed }) => [styles.memberRow, pressed && styles.selectedFunder]} onPress={() => handleFunder(member.id)}>
                 <View
                   style={[
                     styles.memberAvatar,
-                    { backgroundColor: member.type.border },
+                    { backgroundColor: member.type.border }
                   ]}>
                   <Text style={styles.memberAvatarText}>{index + 1}</Text>
                 </View>
@@ -96,24 +82,37 @@ export default function PartyScreen() {
                     {member.type.label}
                   </Text>
                 </View>
-                <Pressable
-                  onPress={() => removeMember(member.id)}
-                  style={({ pressed }) => [styles.removeButton, pressed && styles.pressed]}>
-                  <Text style={styles.removeButtonText}>×</Text>
-                </Pressable>
-              </View>
+              </Pressable>
             ))}
           </View>
+          {
+            isFunder === true &&
+            members.map(item => (
+              item.isFunder === true &&
+
+              <View key={item.id} style={[styles.memberRow, {backgroundColor: PokemonColors.darkContainer, paddingVertical: 20}]}>
+                <View
+                  style={[
+                    styles.memberAvatar,
+                    { backgroundColor: PokemonColors.yellow },
+                  ]}>
+                  <Text style={styles.memberAvatarText}>★</Text>
+                </View>
+
+                <Text style={styles.funderName}>{item.name}</Text>
+            </View>
+            ))
+          }
         </View>
 
         <ScreenFooter
           nextLabel="Next"
-          onNext={members.length === 0 ? () => setIsModal(prev => !prev) : () => router.push('/item')}
+          onNext={isFunder === null ? () => setIsModal(prev => !prev) : () => router.push('/split')}
           onBack={() => router.back()}
         />
-
-        <Modal text={"Please enter members"} isModal={isModal} closeModal={() => setIsModal(prev => !prev)} />
       </View>
+
+      <Modal text={"Please select an option"} isModal={isModal} closeModal={() => setIsModal(prev => !prev)} />
     </SafeAreaView>
   );
 }
@@ -155,32 +154,23 @@ const styles = StyleSheet.create({
     gap: 14,
     backgroundColor: '#FFFFFF',
   },
-  inputRow: {
+  optionRow: {
     flexDirection: 'row',
     gap: 10,
   },
-  input: {
+  option: {
     flex: 1,
     borderWidth: 2,
     borderColor: PokemonColors.border,
     borderRadius: 12,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    fontSize: 15,
-    color: '#2A2A2A',
-    backgroundColor: '#FFFFFF',
-  },
-  addButton: {
-    width: 48,
-    borderWidth: 2,
-    borderColor: PokemonColors.border,
-    borderRadius: 12,
-    backgroundColor: PokemonColors.yellow,
+    backgroundColor: "#FFFFF",
     alignItems: 'center',
     justifyContent: 'center',
+    paddingVertical: 14,
+    borderBottomWidth: 5
   },
-  addButtonText: {
-    fontSize: 22,
+  optionText: {
+    fontSize: 16,
     fontWeight: '800',
     color: PokemonColors.border,
   },
@@ -210,9 +200,11 @@ const styles = StyleSheet.create({
     borderRadius: 15,
     alignItems: 'center',
     justifyContent: 'center',
+    borderWidth: 2,
+    borderColor: PokemonColors.border
   },
   memberAvatarText: {
-    color: '#FFFFFF',
+    color: PokemonColors.bodyText,
     fontSize: 13,
     fontWeight: '800',
   },
@@ -232,22 +224,19 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: '700',
   },
-  removeButton: {
-    width: 26,
-    height: 26,
-    borderRadius: 13,
-    borderWidth: 2,
-    borderColor: PokemonColors.border,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  removeButtonText: {
-    fontSize: 15,
-    fontWeight: '800',
-    color: PokemonColors.border,
-    lineHeight: 16,
+  funderName: {
+    color: "#FFFFFF",
+    fontSize: 18,
+    fontWeight: 800
   },
   pressed: {
-    opacity: 0.8,
+    backgroundColor: PokemonColors.yellow
   },
+  notPressed: {
+    backgroundColor: "#FFFFFF"
+  },
+  selectedFunder: {
+    backgroundColor: PokemonColors.yellow,
+    opacity: 0.8
+  }
 });

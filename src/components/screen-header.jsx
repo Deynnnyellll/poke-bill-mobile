@@ -14,7 +14,7 @@ export default function ScreenHeader({ eyebrow, eyebrowMuted, title, currentStep
 
       {showSteps ? (
         <View style={styles.stepRow}>
-          {Array.from({ length: 6 }, (_, index) => index + 1).map((step) => (
+          {Array.from({ length: 5 }, (_, index) => index + 1).map((step) => (
             <View key={step} style={[styles.stepItem, step === styles.stepItemLast]}>
               <View
                 style={[
@@ -29,7 +29,7 @@ export default function ScreenHeader({ eyebrow, eyebrowMuted, title, currentStep
                   {step}
                 </Text>
               </View>
-              {step !== 6 ? <View style={styles.stepLine} /> : null}
+              {step !== 5 ? <View style={styles.stepLine} /> : null}
             </View>
           ))}
         </View>
@@ -70,6 +70,8 @@ const styles = StyleSheet.create({
   stepRow: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'center',
+
   },
   stepItem: {
     flex: 1,
