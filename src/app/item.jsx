@@ -1,7 +1,7 @@
 import { AppContext } from '@/context/context';
 import useTyper from '@/hooks/useTyper';
 import { useRouter } from 'expo-router';
-import { useContext, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -18,7 +18,7 @@ export default function ItemScreen() {
   const [price, setPrice] = useState('');
   const [isModal, setIsModal] = useState(false);
   
-  const { items, setItems } = useContext(AppContext);
+  const { items, setItems, total, setTotal } = useContext(AppContext);
 
   const DIALOG_TEXT = "Add every line on the bill. Prices get split next.";
   const TYPE_SPEED_MS = 30;
@@ -43,14 +43,16 @@ export default function ItemScreen() {
     setItems((prev) => prev.filter((item) => item.id !== id));
   };
 
-  const getTotal = () => items.reduce((sum, item) => sum + item.price, 0);
+  useEffect(() => {
+    setTotal(items.reduce((sum, item) => sum + item.price, 0));
+  }, [items])
 
   return (
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.card}>
         <ScreenHeader
           eyebrow="STEP 2 / 5"
-          eyebrowMuted={items.length === 0 ? "BILL NOT LOGGED YET" : `P${getTotal().toFixed(0)} Bill`}
+          eyebrowMuted={items.length === 0 ? "BILL NOT LOGGED YET" : `P${total.toFixed(0)} Bill`}
           title="What did we get?"
           currentStep={2}
         />
@@ -109,7 +111,7 @@ export default function ItemScreen() {
 
           <View style={styles.totalRow}>
             <Text style={styles.totalLabel}>BILL TOTAL</Text>
-            <Text style={styles.totalValue}>₱{getTotal().toFixed(2)}</Text>
+            <Text style={styles.totalValue}>₱{total.toFixed(2)}</Text>
           </View>
         </View>
 

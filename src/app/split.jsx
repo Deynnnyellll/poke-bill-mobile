@@ -1,7 +1,7 @@
 import { AppContext } from '@/context/context';
 import useTyper from '@/hooks/useTyper';
 import { useRouter } from 'expo-router';
-import { useContext, useMemo, useState } from 'react';
+import { useContext, useEffect, useMemo, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -16,7 +16,7 @@ export default function AssignScreen() {
   const [isModal, setIsModal] = useState(false);
 
   // assignments: { [itemId]: string[] of memberIds sharing that item }
-  const { members, items, assignments, setAssignments } = useContext(AppContext);
+  const { members, setMembers, items, assignments, setAssignments } = useContext(AppContext);
 
   const DIALOG_TEXT = 'Tag everyone who shared each item.';
   const TYPE_SPEED_MS = 30;
@@ -38,21 +38,23 @@ export default function AssignScreen() {
     });
   };
 
-  // How much each member owes, summed across every item they're tagged on.
-  const memberTotals = useMemo(() => {
-    const totals = Object.fromEntries(members.map((m) => [m.id, 0]));
-
-    items.forEach((item) => {
-      const sharers = assignments[item.id] ?? [];
-      if (sharers.length === 0) return;
-      const each = item.price / sharers.length;
-      sharers.forEach((memberId) => {
-        if (totals[memberId] !== undefined) totals[memberId] += each;
-      });
-    });
-
-    return totals;
-  }, [items, members, assignments]);
+  // Whenever items or assignments change, recompute each member's share and
+  // write it straight onto their object as `totalOwed` — this is what the
+  // "EACH PAYS" list below renders from.
+  useEffect(() => {
+    setMembers((prev) =>
+      prev.map((member) => {
+        let total = 0;
+        items.forEach((item) => {
+          const sharers = assignments[item.id] ?? [];
+          if (sharers.includes(member.id)) {
+            total += item.price / sharers.length;
+          }
+        });
+        return { ...member, totalOwed: total };
+      })
+    );
+  }, [items, assignments]);
 
   const allItemsAssigned = items.every((item) => (assignments[item.id]?.length ?? 0) > 0);
 
@@ -137,7 +139,7 @@ export default function AssignScreen() {
             <Text style={styles.summaryLabel}>EACH PAYS</Text>
 
             {members.map((member) => {
-              const total = memberTotals[member.id] ?? 0;
+              const total = member.totalOwed ?? 0;
               const fraction = billTotal > 0 ? total / billTotal : 0;
 
               return (
