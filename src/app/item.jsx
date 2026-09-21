@@ -2,7 +2,7 @@ import { AppContext } from '@/context/context';
 import useTyper from '@/hooks/useTyper';
 import { useRouter } from 'expo-router';
 import { useContext, useEffect, useState } from 'react';
-import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import ScreenFooter from '@/components/screen-footer';
@@ -62,61 +62,63 @@ export default function ItemScreen() {
           <Text style={styles.dialogArrow}>▼</Text>
         </View>
 
-        <View style={styles.content}>
-          <View style={styles.inputRow}>
-            <TextInput
-              style={styles.inputName}
-              value={itemName}
-              onChangeText={setItemName}
-              placeholder="Item name..."
-              placeholderTextColor="#9A9EA8"
-              returnKeyType="done"
-              onSubmitEditing={addItem}
-            />
-            <TextInput
-              style={styles.inputPrice}
-              value={price}
-              onChangeText={setPrice}
-              placeholder="₱0"
-              placeholderTextColor="#9A9EA8"
-              keyboardType="decimal-pad"
-              returnKeyType="done"
-              onSubmitEditing={addItem}
-            />
-            <Pressable
-              onPress={addItem}
-              style={({ pressed }) => [styles.addButton, pressed && styles.pressed]}>
-              <Text style={styles.addButtonText}>+</Text>
-            </Pressable>
-          </View>
-
-          <Text style={styles.metaText}>ITEMS · {items.length} LOGGED</Text>
-
-          <View style={styles.memberList}>
-            {items.map((item, index) => (
-              <View key={item.id} style={styles.memberRow}>
-                <View style={styles.itemNumberCont}>
-                  <Text style={styles.itemNumber}>{index + 1}</Text>
-                </View>
-                <Text style={styles.itemName}>{item.name}</Text>
-                <Text style={styles.priceText}>₱{item.price.toFixed(2)}</Text>
-                <Pressable
-                  onPress={() => removeItem(item.id)}
-                  style={({ pressed }) => [styles.removeButton, pressed && styles.pressed]}>
-                  <Text style={styles.removeButtonText}>×</Text>
-                </Pressable>
-              </View>
-            ))}
-          </View>
-
-          {
-            items.length !== 0 &&
-            <View style={styles.totalRow}>
-              <Text style={styles.totalLabel}>BILL TOTAL</Text>
-              <Text style={styles.totalValue}>₱{total.toFixed(2)}</Text>
+        <ScrollView style={{backgroundColor: "#FFF"}}>
+          <View style={styles.content}>
+            <View style={styles.inputRow}>
+              <TextInput
+                style={styles.inputName}
+                value={itemName}
+                onChangeText={setItemName}
+                placeholder="Item name..."
+                placeholderTextColor="#9A9EA8"
+                returnKeyType="done"
+                onSubmitEditing={addItem}
+              />
+              <TextInput
+                style={styles.inputPrice}
+                value={price}
+                onChangeText={setPrice}
+                placeholder="₱0"
+                placeholderTextColor="#9A9EA8"
+                keyboardType="decimal-pad"
+                returnKeyType="done"
+                onSubmitEditing={addItem}
+              />
+              <Pressable
+                onPress={addItem}
+                style={({ pressed }) => [styles.addButton, pressed && styles.pressed]}>
+                <Text style={styles.addButtonText}>+</Text>
+              </Pressable>
             </View>
-          }
-        </View>
+
+            <Text style={styles.metaText}>ITEMS · {items.length} LOGGED</Text>
+
+            <View style={styles.memberList}>
+              {items.map((item, index) => (
+                <View key={item.id} style={styles.memberRow}>
+                  <View style={styles.itemNumberCont}>
+                    <Text style={styles.itemNumber}>{index + 1}</Text>
+                  </View>
+                  <Text style={styles.itemName}>{item.name}</Text>
+                  <Text style={styles.priceText}>₱{item.price.toFixed(2)}</Text>
+                  <Pressable
+                    onPress={() => removeItem(item.id)}
+                    style={({ pressed }) => [styles.removeButton, pressed && styles.pressed]}>
+                    <Text style={styles.removeButtonText}>×</Text>
+                  </Pressable>
+                </View>
+              ))}
+            </View>
+
+            {
+              items.length !== 0 &&
+              <View style={styles.totalRow}>
+                <Text style={styles.totalLabel}>BILL TOTAL</Text>
+                <Text style={styles.totalValue}>₱{total.toFixed(2)}</Text>
+              </View>
+            }
+          </View>
+        </ScrollView>
 
         <ScreenFooter
           nextLabel="Next"

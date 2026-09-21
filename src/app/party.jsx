@@ -2,7 +2,7 @@ import { AppContext } from '@/context/context';
 import useTyper from '@/hooks/useTyper';
 import { useRouter } from 'expo-router';
 import { useContext, useState } from 'react';
-import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import ScreenFooter from '@/components/screen-footer';
@@ -56,55 +56,57 @@ export default function PartyScreen() {
           <Text style={styles.dialogArrow}>▼</Text>
         </View>
 
-        <View style={styles.content}>
-          <View style={styles.inputRow}>
-            <TextInput
-              style={styles.input}
-              value={name}
-              onChangeText={setName}
-              placeholder="Enter name..."
-              placeholderTextColor="#9A9EA8"
-              returnKeyType="done"
-              onSubmitEditing={addMember}
-            />
-            <Pressable
-              onPress={addMember}
-              style={({ pressed }) => [styles.addButton, pressed && styles.pressed]}>
-              <Text style={styles.addButtonText}>+</Text>
-            </Pressable>
-          </View>
+        <ScrollView style={{backgroundColor: "#FFF"}}>
+          <View style={styles.content}>
+            <View style={styles.inputRow}>
+              <TextInput
+                style={styles.input}
+                value={name}
+                onChangeText={setName}
+                placeholder="Enter name..."
+                placeholderTextColor="#9A9EA8"
+                returnKeyType="done"
+                onSubmitEditing={addMember}
+              />
+              <Pressable
+                onPress={addMember}
+                style={({ pressed }) => [styles.addButton, pressed && styles.pressed]}>
+                <Text style={styles.addButtonText}>+</Text>
+              </Pressable>
+            </View>
 
-          <Text style={styles.metaText}>PARTY · {members.length} MEMBERS</Text>
+            <Text style={styles.metaText}>PARTY · {members.length} MEMBERS</Text>
 
-          <View style={styles.memberList}>
-            {members.map((member, index) => (
-              <View key={member.id} style={styles.memberRow}>
-                <View
-                  style={[
-                    styles.memberAvatar,
-                    { backgroundColor: member.type.border },
-                  ]}>
-                  <Text style={styles.memberAvatarText}>{index + 1}</Text>
+            <View style={styles.memberList}>
+              {members.map((member, index) => (
+                <View key={member.id} style={styles.memberRow}>
+                  <View
+                    style={[
+                      styles.memberAvatar,
+                      { backgroundColor: member.type.border },
+                    ]}>
+                    <Text style={styles.memberAvatarText}>{index + 1}</Text>
+                  </View>
+                  <Text style={styles.memberName}>{member.name}</Text>
+                  <View
+                    style={[
+                      styles.memberBadge,
+                      { backgroundColor: member.type.bg, borderColor: member.type.border },
+                    ]}>
+                    <Text style={[styles.memberBadgeText, { color: member.type.text }]}>
+                      {member.type.label}
+                    </Text>
+                  </View>
+                  <Pressable
+                    onPress={() => removeMember(member.id)}
+                    style={({ pressed }) => [styles.removeButton, pressed && styles.pressed]}>
+                    <Text style={styles.removeButtonText}>×</Text>
+                  </Pressable>
                 </View>
-                <Text style={styles.memberName}>{member.name}</Text>
-                <View
-                  style={[
-                    styles.memberBadge,
-                    { backgroundColor: member.type.bg, borderColor: member.type.border },
-                  ]}>
-                  <Text style={[styles.memberBadgeText, { color: member.type.text }]}>
-                    {member.type.label}
-                  </Text>
-                </View>
-                <Pressable
-                  onPress={() => removeMember(member.id)}
-                  style={({ pressed }) => [styles.removeButton, pressed && styles.pressed]}>
-                  <Text style={styles.removeButtonText}>×</Text>
-                </Pressable>
-              </View>
-            ))}
+              ))}
+            </View>
           </View>
-        </View>
+        </ScrollView>
 
         <ScreenFooter
           nextLabel="Next"

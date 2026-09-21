@@ -2,7 +2,7 @@ import { AppContext } from '@/context/context';
 import useTyper from '@/hooks/useTyper';
 import { useRouter } from 'expo-router';
 import { useContext, useState } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import ScreenFooter from '@/components/screen-footer';
@@ -49,65 +49,67 @@ export default function ItemScreen() {
           <Text style={styles.dialogArrow}>▼</Text>
         </View>
 
-        <View style={styles.content}>
-          <View style={styles.optionRow}>
-            <Pressable
-              onPress={() => setIsFunder(true)}
-              style={[styles.option, isFunder === true ? styles.pressed : styles.notPressed]}>
-              <Text style={styles.optionText}>One Person Paid</Text>
-            </Pressable>
-
-            <Pressable
-              onPress={handleSplitEvenly}
-              style={[styles.option, isFunder === false ? styles.pressed : styles.notPressed]}>
-              <Text style={styles.optionText}>Split Evenly</Text>
-            </Pressable>
-          </View>
-
-          <Text style={styles.metaText}>PICK THE FUNDER</Text>
-
-          <View style={styles.memberList}>
-            {members.map((member, index) => (
-              <Pressable key={member.id} style={({ pressed }) => [styles.memberRow, pressed && styles.selectedFunder]} onPress={() => handleFunder(member.id)}>
-                <View
-                  style={[
-                    styles.memberAvatar,
-                    { backgroundColor: member.type.border }
-                  ]}>
-                  <Text style={styles.memberAvatarText}>{index + 1}</Text>
-                </View>
-                <Text style={styles.memberName}>{member.name}</Text>
-                <View
-                  style={[
-                    styles.memberBadge,
-                    { backgroundColor: member.type.bg, borderColor: member.type.border },
-                  ]}>
-                  <Text style={[styles.memberBadgeText, { color: member.type.text }]}>
-                    {member.type.label}
-                  </Text>
-                </View>
+        <ScrollView style={{backgroundColor: "#FFF"}}>
+          <View style={styles.content}>
+            <View style={styles.optionRow}>
+              <Pressable
+                onPress={() => setIsFunder(true)}
+                style={[styles.option, isFunder === true ? styles.pressed : styles.notPressed]}>
+                <Text style={styles.optionText}>One Person Paid</Text>
               </Pressable>
-            ))}
-          </View>
-          {
-            isFunder === true &&
-            members.map(item => (
-              item.isFunder === true &&
 
-              <View key={item.id} style={[styles.memberRow, {backgroundColor: PokemonColors.darkContainer, paddingVertical: 20}]}>
-                <View
-                  style={[
-                    styles.memberAvatar,
-                    { backgroundColor: PokemonColors.yellow },
-                  ]}>
-                  <Text style={styles.memberAvatarText}>★</Text>
-                </View>
-
-                <Text style={styles.funderName}>{item.name}</Text>
+              <Pressable
+                onPress={handleSplitEvenly}
+                style={[styles.option, isFunder === false ? styles.pressed : styles.notPressed]}>
+                <Text style={styles.optionText}>Split Evenly</Text>
+              </Pressable>
             </View>
-            ))
-          }
-        </View>
+
+            <Text style={styles.metaText}>PICK THE FUNDER</Text>
+
+            <View style={styles.memberList}>
+              {members.map((member, index) => (
+                <Pressable key={member.id} style={({ pressed }) => [styles.memberRow, pressed && styles.selectedFunder]} onPress={() => handleFunder(member.id)}>
+                  <View
+                    style={[
+                      styles.memberAvatar,
+                      { backgroundColor: member.type.border }
+                    ]}>
+                    <Text style={styles.memberAvatarText}>{index + 1}</Text>
+                  </View>
+                  <Text style={styles.memberName}>{member.name}</Text>
+                  <View
+                    style={[
+                      styles.memberBadge,
+                      { backgroundColor: member.type.bg, borderColor: member.type.border },
+                    ]}>
+                    <Text style={[styles.memberBadgeText, { color: member.type.text }]}>
+                      {member.type.label}
+                    </Text>
+                  </View>
+                </Pressable>
+              ))}
+            </View>
+            {
+              isFunder === true &&
+              members.map(item => (
+                item.isFunder === true &&
+
+                <View key={item.id} style={[styles.memberRow, {backgroundColor: PokemonColors.darkContainer, paddingVertical: 20}]}>
+                  <View
+                    style={[
+                      styles.memberAvatar,
+                      { backgroundColor: PokemonColors.yellow },
+                    ]}>
+                    <Text style={styles.memberAvatarText}>★</Text>
+                  </View>
+
+                  <Text style={styles.funderName}>{item.name}</Text>
+              </View>
+              ))
+            }
+          </View>
+        </ScrollView>
 
         <ScreenFooter
           nextLabel="Next"

@@ -2,7 +2,7 @@ import { PokemonColors } from '@/constants/pokemon-theme';
 import { getSplitHistory } from '@/utils/split-history';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import ReceiptView from '@/components/receipt-view';
@@ -34,6 +34,14 @@ export default function HistoryRecordScreen() {
   return (
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.card}>
+        {/* Web-only — native builds don't need to advertise themselves */}
+        {Platform.OS === 'web' && (
+          <Link href="/download" asChild>
+            <View style={styles.downloadBanner}>
+              <Text style={styles.bannerText}>Get the native app →</Text>
+            </View>
+          </Link>
+        )}
         <View style={styles.header}>
           <Text style={styles.eyebrow}>PAST ENCOUNTER</Text>
           <Text style={styles.title}>
@@ -146,6 +154,19 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '800',
     color: PokemonColors.bodyText,
+  },
+  downloadBanner: {
+    backgroundColor: PokemonColors.navy,
+    paddingVertical: 8,
+    alignItems: 'center',
+    borderBottomWidth: 2,
+    borderBottomColor: PokemonColors.border,
+    cursor: Platform.OS === 'web' ? 'pointer' : undefined,
+  },
+  bannerText: {
+    color: PokemonColors.yellow,
+    fontSize: 13,
+    fontWeight: '700',
   },
   pressed: {
     opacity: 0.8,
