@@ -130,10 +130,12 @@ export default function ItemScreen() {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
+    width: '100%',
     backgroundColor: PokemonColors.cream,
   },
   card: {
     flex: 1,
+    width: '100%',
     backgroundColor: PokemonColors.cream,
   },
   dialogBox: {
@@ -159,6 +161,7 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
+    width: '100%',
     paddingHorizontal: 20,
     paddingVertical: 24,
     gap: 14,
@@ -166,10 +169,12 @@ const styles = StyleSheet.create({
   },
   inputRow: {
     flexDirection: 'row',
+    width: '100%',
     gap: 10,
   },
   inputName: {
     flex: 1,
+    minWidth: 0,
     borderWidth: 2,
     borderColor: PokemonColors.border,
     borderRadius: 12,
@@ -181,6 +186,7 @@ const styles = StyleSheet.create({
   },
   inputPrice: {
     flex: 0.5,
+    minWidth: 0,
     borderWidth: 2,
     borderColor: PokemonColors.border,
     borderRadius: 12,
@@ -192,6 +198,7 @@ const styles = StyleSheet.create({
   },
   addButton: {
     width: 48,
+    flexShrink: 0,
     borderWidth: 2,
     borderColor: PokemonColors.border,
     borderRadius: 12,
