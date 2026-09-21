@@ -3,7 +3,7 @@ import { useRouter } from 'expo-router';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-const ANDROID_URL = 'https://expo.dev/artifacts/eas/OTuReHWqVd1W2M_NWCNAXTEye5bgwySd3lpicv-mFf0.aab';
+const ANDROID_URL = 'https://expo.dev/accounts/deynyel/projects/bill-splitter-pokemon/builds/1413f047-765b-406c-9175-e9122220b609';
 const IOS_URL = null; // 
 
 export default function DownloadScreen() {
