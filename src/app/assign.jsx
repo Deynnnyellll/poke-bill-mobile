@@ -29,6 +29,10 @@ export default function ItemScreen() {
     }
   }
 
+  const handleSplitEvenly = () => {
+    setMembers((prev) => prev.map(item => item.id && {...item, isFunder: false}))
+    setIsFunder(false);
+  }
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -54,7 +58,7 @@ export default function ItemScreen() {
             </Pressable>
 
             <Pressable
-              onPress={() => setIsFunder(false)}
+              onPress={handleSplitEvenly}
               style={[styles.option, isFunder === false ? styles.pressed : styles.notPressed]}>
               <Text style={styles.optionText}>Split Evenly</Text>
             </Pressable>

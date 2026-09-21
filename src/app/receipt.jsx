@@ -99,6 +99,7 @@ export default function AssignScreen() {
       <Modal
         text="Couldn't save the receipt. Check your connection to local storage and try again."
         isModal={saveFailed}
+        metal={true}
         closeModal={() => setSaveFailed(false)}
       />
     </SafeAreaView>

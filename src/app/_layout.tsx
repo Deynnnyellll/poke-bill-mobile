@@ -1,7 +1,6 @@
 import { AppProvider } from '@/context/context';
 import { DarkTheme, DefaultTheme, Link, Slot, ThemeProvider } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
-import { useEffect } from 'react';
 import { Platform, StyleSheet, Text, View } from 'react-native';
 
 import PhoneOnlyGate from '@/components/android-only-gate';
@@ -14,16 +13,6 @@ SplashScreen.preventAutoHideAsync();
 export default function TabLayout() {
   const colorScheme = useColorScheme();
 
-  // Required for PWA installability — the "Install app" prompt won't
-  // fire without a registered service worker. No-op on native builds.
-  useEffect(() => {
-    if (Platform.OS === 'web' && 'serviceWorker' in navigator) {
-      navigator.serviceWorker.register('/sw.js').catch((err) => {
-        console.warn('Service worker registration failed:', err);
-      });
-    }
-  }, []);
-
   return (
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
       <PhoneOnlyGate>
@@ -34,7 +23,7 @@ export default function TabLayout() {
           {Platform.OS === 'web' && (
             <Link href="/download" asChild>
               <View style={styles.downloadBanner}>
-                <Text style={styles.bannerText}>📲 Get the native app →</Text>
+                <Text style={styles.bannerText}>Get the native app →</Text>
               </View>
             </Link>
           )}

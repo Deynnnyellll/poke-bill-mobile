@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Animated, Easing, Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { PokemonColors } from '@/constants/pokemon-theme';
+import MetalHuggingRope from './ui/metal-hugging';
 import RopeKnotDragon from './ui/rope-knot-dragon';
 
 export default function Modal(props) {
@@ -55,7 +56,7 @@ export default function Modal(props) {
                 }}
               >
                 <View style={styles.illustrationWrap} pointerEvents="none">
-                  <RopeKnotDragon width={120} />
+                  {props.metal === false ? <RopeKnotDragon width={120} /> : <MetalHuggingRope  /> }
                 </View>
 
                 <View style={styles.tag}>
