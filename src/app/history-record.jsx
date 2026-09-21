@@ -1,6 +1,6 @@
 import { PokemonColors } from '@/constants/pokemon-theme';
 import { getSplitHistory } from '@/utils/split-history';
-import { useLocalSearchParams, useRouter } from 'expo-router';
+import { Link, useLocalSearchParams, useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { ActivityIndicator, Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -147,7 +147,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     borderWidth: 2.5,
     borderColor: PokemonColors.border,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: PokemonColors.yellow,
     alignItems: 'center',
   },
   backButtonText: {
