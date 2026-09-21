@@ -11,6 +11,7 @@ const MAX_PHONE_WIDTH = 480;
 // screens (tablets, desktop browsers) regardless of OS.
 export default function PhoneOnlyGate({ children }) {
   const { width } = useWindowDimensions();
+  console.log('[PhoneOnlyGate] width:', width); 
   const isPhoneWidth = width <= MAX_PHONE_WIDTH;
 
   if (isPhoneWidth) {

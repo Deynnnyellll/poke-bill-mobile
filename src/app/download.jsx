@@ -3,11 +3,8 @@ import { useRouter } from 'expo-router';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-// Web-only destination — reached via the "Get the app" banner in the
-// root layout. Placeholder links for now; swap the hrefs once you have
-// real Play Store / App Store listings.
-const ANDROID_URL = '#'; // TODO: replace with Play Store link
-const IOS_URL = '#'; // TODO: replace with App Store link
+const ANDROID_URL = 'https://expo.dev/artifacts/eas/OTuReHWqVd1W2M_NWCNAXTEye5bgwySd3lpicv-mFf0.aab';
+const IOS_URL = '#'; // 
 
 export default function DownloadScreen() {
   const router = useRouter();
@@ -37,7 +34,7 @@ export default function DownloadScreen() {
           >
             <Text style={styles.buttonIcon}>▶</Text>
             <View style={styles.buttonTextWrap}>
-              <Text style={styles.buttonLabel}>Get it on</Text>
+              <Text style={styles.buttonLabel}>GET IT ON</Text>
               <Text style={styles.buttonStore}>Android</Text>
             </View>
           </Pressable>
@@ -48,7 +45,7 @@ export default function DownloadScreen() {
           >
             <Text style={styles.buttonIcon}></Text>
             <View style={styles.buttonTextWrap}>
-              <Text style={[styles.buttonLabel, styles.iosText]}>Download on</Text>
+              <Text style={[styles.buttonLabel, styles.iosText]}>Download on the</Text>
               <Text style={[styles.buttonStore, styles.iosText]}>IOS</Text>
             </View>
           </Pressable>
