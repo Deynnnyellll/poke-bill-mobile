@@ -6,16 +6,25 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import ScreenFooter from '@/components/screen-footer';
 import ScreenHeader from '@/components/screen-header';
 import { PokemonColors, TYPE_BADGES } from '@/constants/pokemon-theme';
+import { AppContext } from '@/context/context';
+import { useContext, useEffect } from 'react';
 
 export default function HomeScreen() {
   // this is for useTyper
   const DIALOG_TEXT = "A wild BILL appeared! Log the items and we'll split it.";
   const TYPE_SPEED_MS = 30;
+  const { setTotal, setMembers, setItems } = useContext(AppContext);
 
   const router = useRouter();
 
   // call the custom hook
   const typedDialogText = useTyper(DIALOG_TEXT, TYPE_SPEED_MS);
+
+  useEffect(() => {
+    setTotal(0);
+    setMembers([]);
+    setItems([]);
+  }, [])
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -70,6 +79,7 @@ export default function HomeScreen() {
         </View>
 
         <ScreenFooter
+          showBack={false}
           nextLabel="Start the split"
           onNext={() => router.push('/party')}
         />

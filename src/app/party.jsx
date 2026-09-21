@@ -108,11 +108,11 @@ export default function PartyScreen() {
 
         <ScreenFooter
           nextLabel="Next"
-          onNext={members.length === 0 ? () => setIsModal(prev => !prev) : () => router.push('/item')}
+          onNext={members.length <= 1 ? () => setIsModal(prev => !prev) : () => router.push('/item')}
           onBack={() => router.back()}
         />
 
-        <Modal text={"Please enter members"} isModal={isModal} closeModal={() => setIsModal(prev => !prev)} />
+        <Modal text={"Please enter more than one members"} isModal={isModal} closeModal={() => setIsModal(prev => !prev)} />
       </View>
     </SafeAreaView>
   );
@@ -161,6 +161,7 @@ const styles = StyleSheet.create({
   },
   input: {
     flex: 1,
+    minWidth: 0,
     borderWidth: 2,
     borderColor: PokemonColors.border,
     borderRadius: 12,

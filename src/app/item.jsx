@@ -109,10 +109,13 @@ export default function ItemScreen() {
             ))}
           </View>
 
-          <View style={styles.totalRow}>
-            <Text style={styles.totalLabel}>BILL TOTAL</Text>
-            <Text style={styles.totalValue}>₱{total.toFixed(2)}</Text>
-          </View>
+          {
+            items.length !== 0 &&
+            <View style={styles.totalRow}>
+              <Text style={styles.totalLabel}>BILL TOTAL</Text>
+              <Text style={styles.totalValue}>₱{total.toFixed(2)}</Text>
+            </View>
+          }
         </View>
 
         <ScreenFooter

@@ -4,14 +4,15 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 const ANDROID_URL = 'https://expo.dev/artifacts/eas/OTuReHWqVd1W2M_NWCNAXTEye5bgwySd3lpicv-mFf0.aab';
-const IOS_URL = '#'; // 
+const IOS_URL = null; // 
 
 export default function DownloadScreen() {
   const router = useRouter();
 
   const openLink = (url) => {
-    if (url === '#') return; // placeholder — not wired up yet
-    if (typeof window !== 'undefined') window.open(url, '_blank');
+    if (!url) return; 
+
+    window.open(url, '_blank');
   };
 
   return (
