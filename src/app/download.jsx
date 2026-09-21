@@ -3,7 +3,7 @@ import { useRouter } from 'expo-router';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-const ANDROID_URL = 'https://expo.dev/accounts/deynyel/projects/bill-splitter-pokemon/builds/1413f047-765b-406c-9175-e9122220b609';
+const ANDROID_URL = 'https://expo.dev/accounts/deynyel/projects/bill-splitter-pokemon/builds/e79d1841-9de8-4a72-acbc-72e7e2aa27ec';
 const IOS_URL = null; // 
 
 export default function DownloadScreen() {
@@ -51,7 +51,7 @@ export default function DownloadScreen() {
             </View>
           </Pressable>
 
-          <Text style={styles.comingSoon}>Links coming soon — app is still in testing.</Text>
+          <Text style={styles.comingSoon}>IOS link coming soon — app is still in testing.</Text>
         </View>
 
         <Pressable
