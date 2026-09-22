@@ -1,3 +1,4 @@
+import BackPet from '@/components/ui/back-pet';
 import { PokemonColors } from '@/constants/pokemon-theme';
 import { Sounds } from '@/constants/sounds';
 import { useSoundEffect } from '@/hooks/use-sound-effect';
@@ -54,17 +55,35 @@ export default function HistoryDetailScreen() {
               <Text style={styles.title}>History</Text>
             </View>
 
-            {records.length > 0 && (
+            <View style={styles.headerRight}>
+              {records.length > 0 && (
+                <Pressable
+                  onPress={() => {
+                    setConfirmClear(true);
+                    playTap();
+                  }}
+                  style={({ pressed }) => [styles.clearButton, pressed && styles.pressed]}
+                >
+                  <Text style={styles.clearButtonText}>Clear</Text>
+                </Pressable>
+              )}
+
               <Pressable
                 onPress={() => {
-                  setConfirmClear(true);
+                  router.back();
                   playTap();
                 }}
-                style={({ pressed }) => [styles.clearButton, pressed && styles.pressed]}
+                hitSlop={10}
+                accessibilityLabel="Go back"
+                accessibilityRole="button"
+                style={({ pressed }) => [styles.backButtonWrap, pressed && styles.pressed]}
               >
-                <Text style={styles.clearButtonText}>Clear</Text>
+                <View style={styles.backButton}>
+                  <BackPet width={30} />
+                </View>
+                <Text style={styles.backButtonText}>Back</Text>
               </Pressable>
-            )}
+            </View>
           </View>
         </View>
 
@@ -169,6 +188,32 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'flex-end',
+  },
+  headerRight: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+  },
+  backButtonWrap: {
+    alignItems: 'center',
+    gap: 3,
+  },
+  backButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    overflow: 'hidden',
+    backgroundColor: PokemonColors.cream,
+    borderWidth: 2,
+    borderColor: PokemonColors.yellow,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  backButtonText: {
+    fontSize: 10,
+    fontWeight: '700',
+    letterSpacing: 0.5,
+    color: PokemonColors.eyebrowMuted,
   },
   eyebrow: {
     fontSize: 12,

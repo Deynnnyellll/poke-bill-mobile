@@ -181,6 +181,7 @@ export default function AssignScreen() {
       <Modal
         text="Every item needs at least one person tagged before you can see the receipt."
         isModal={isModal}
+        metal={false}
         closeModal={() => setIsModal(false)}
       />
     </SafeAreaView>

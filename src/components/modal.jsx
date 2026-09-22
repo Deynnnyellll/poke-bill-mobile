@@ -6,6 +6,7 @@ import { Sounds } from '@/constants/sounds';
 import { useSoundEffect } from '@/hooks/use-sound-effect';
 import MetalHuggingRope from './ui/metal-hugging';
 import RopeKnotDragon from './ui/rope-knot-dragon';
+import ThunderPetHugging from './ui/thunder-pet';
 
 export default function Modal(props) {
   const playTap = useSoundEffect(Sounds.tap);
@@ -60,7 +61,13 @@ export default function Modal(props) {
                 }}
               >
                 <View style={styles.illustrationWrap} pointerEvents="none">
-                  {props.metal ? <MetalHuggingRope /> : <RopeKnotDragon width={120} />}
+                  {props.thunder ? (
+                    <ThunderPetHugging width={120} />
+                  ) : props.metal ? (
+                    <MetalHuggingRope />
+                  ) : (
+                    <RopeKnotDragon width={120} />
+                  )}
                 </View>
 
                 <View style={styles.tag}>

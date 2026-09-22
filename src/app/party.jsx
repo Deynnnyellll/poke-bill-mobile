@@ -119,7 +119,7 @@ export default function PartyScreen() {
           onBack={() => router.back()}
         />
 
-        <Modal text={"Please enter more than one members"} isModal={isModal} closeModal={() => setIsModal(prev => !prev)} />
+        <Modal text={"Please enter more than one members"} isModal={isModal} metal={false} closeModal={() => setIsModal(prev => !prev)} />
       </View>
     </SafeAreaView>
   );

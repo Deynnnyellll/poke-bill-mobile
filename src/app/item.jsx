@@ -132,7 +132,7 @@ export default function ItemScreen() {
         />
       </View>
 
-      <Modal text={"Please enter items"} isModal={isModal} closeModal={() => setIsModal(prev => !prev)} />
+      <Modal text={"Please enter items"} isModal={isModal} metal={false} closeModal={() => setIsModal(prev => !prev)} />
     </SafeAreaView>
   );
 }

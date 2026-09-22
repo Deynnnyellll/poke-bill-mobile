@@ -20,7 +20,7 @@ export default function AssignScreen() {
   const [saveFailed, setSaveFailed] = useState(false);
   const [saving, setSaving] = useState(false);
 
-  const { items, members ,total, setItems, setMembers, setAssignments, setTotal } = useContext(AppContext);
+  const { items, members ,total, setItems, setMembers, setAssignments, setTotal, setSplitCompleted } = useContext(AppContext);
 
   const DIALOG_TEXT = 'Everyone share is set. You can tap share to send it around.';
   const TYPE_SPEED_MS = 30;
@@ -50,6 +50,7 @@ export default function AssignScreen() {
       setTotal(0);
       setMembers([]);
       setItems([]);
+      setSplitCompleted(true);
       router.push("./");
     }, 500);
   }
@@ -87,19 +88,21 @@ export default function AssignScreen() {
       <Modal
         text="Every item needs at least one person tagged before you can see the receipt."
         isModal={isModal}
+        metal={false}
         closeModal={() => setIsModal(false)}
       />
 
       <Modal
         text="Receipt saved."
         isModal={isReceiptModal}
+        metal={true}
         closeModal={closeReceiptModal}
       />
 
       <Modal
         text="Couldn't save the receipt. Check your connection to local storage and try again."
         isModal={saveFailed}
-        metal={true}
+        metal={false}
         closeModal={() => setSaveFailed(false)}
       />
     </SafeAreaView>

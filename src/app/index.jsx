@@ -3,20 +3,22 @@ import { useRouter } from 'expo-router';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import Modal from '@/components/modal';
 import ScreenFooter from '@/components/screen-footer';
 import ScreenHeader from '@/components/screen-header';
 import { PokemonColors, TYPE_BADGES } from '@/constants/pokemon-theme';
 import { Sounds } from '@/constants/sounds';
 import { AppContext } from '@/context/context';
 import { useSoundEffect } from '@/hooks/use-sound-effect';
-import { useContext, useEffect } from 'react';
+import { useContext, useEffect, useState } from 'react';
 
 export default function HomeScreen() {
   // this is for useTyper
   const DIALOG_TEXT = "A wild BILL appeared! Log the items and we'll split it.";
   const TYPE_SPEED_MS = 30;
-  const { setTotal, setMembers, setItems } = useContext(AppContext);
+  const { setTotal, setMembers, setItems, splitCompleted, setSplitCompleted } = useContext(AppContext);
   const playTap = useSoundEffect(Sounds.tap);
+  const [isCompleteModal, setIsCompleteModal] = useState(false);
 
   const router = useRouter();
 
@@ -27,6 +29,11 @@ export default function HomeScreen() {
     setTotal(0);
     setMembers([]);
     setItems([]);
+
+    if (splitCompleted) {
+      setIsCompleteModal(true);
+      setSplitCompleted(false);
+    }
   }, [])
 
   return (
@@ -90,6 +97,13 @@ export default function HomeScreen() {
           onNext={() => router.push('/party')}
         />
       </View>
+
+      <Modal
+        text="Split complete! Your receipt was saved to the PokéBox."
+        isModal={isCompleteModal}
+        thunder={true}
+        closeModal={() => setIsCompleteModal(false)}
+      />
     </SafeAreaView>
   );
 }
