@@ -6,7 +6,9 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import ScreenFooter from '@/components/screen-footer';
 import ScreenHeader from '@/components/screen-header';
 import { PokemonColors, TYPE_BADGES } from '@/constants/pokemon-theme';
+import { Sounds } from '@/constants/sounds';
 import { AppContext } from '@/context/context';
+import { useSoundEffect } from '@/hooks/use-sound-effect';
 import { useContext, useEffect } from 'react';
 
 export default function HomeScreen() {
@@ -14,6 +16,7 @@ export default function HomeScreen() {
   const DIALOG_TEXT = "A wild BILL appeared! Log the items and we'll split it.";
   const TYPE_SPEED_MS = 30;
   const { setTotal, setMembers, setItems } = useContext(AppContext);
+  const playTap = useSoundEffect(Sounds.tap);
 
   const router = useRouter();
 
@@ -37,7 +40,10 @@ export default function HomeScreen() {
           />
 
           <Pressable
-            onPress={() => router.push('/history')}
+            onPress={() => {
+              router.push('/history');
+              playTap();
+            }}
             style={({ pressed }) => [styles.historyButton, pressed && styles.pressed]}
           >
             <View style={styles.historyIcon}>

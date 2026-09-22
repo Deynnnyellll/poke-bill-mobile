@@ -1,6 +1,8 @@
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { PokemonColors, PokemonTypography } from '@/constants/pokemon-theme';
+import { Sounds } from '@/constants/sounds';
+import { useSoundEffect } from '@/hooks/use-sound-effect';
 
 export default function ScreenFooter({
   onBack,
@@ -11,18 +13,31 @@ export default function ScreenFooter({
   hintLeft = 'ENTER NEXT',
   hintRight = 'BKSP BACK',
 }) {
+  const playBack = useSoundEffect(Sounds.back);
+  const playConfirm = useSoundEffect(Sounds.confirm);
+
+  const handleBack = () => {
+    onBack?.();
+    playBack();
+  };
+
+  const handleNext = () => {
+    onNext?.();
+    playConfirm();
+  };
+
   return (
     <View style={styles.footer}>
       <View style={styles.footerButtons}>
         {showBack ? (
           <Pressable
-            onPress={onBack}
+            onPress={handleBack}
             style={({ pressed }) => [styles.backButton, pressed && styles.pressed]}>
             <Text style={styles.backButtonText}>{backLabel}</Text>
           </Pressable>
         ) : null}
         <Pressable
-          onPress={onNext}
+          onPress={handleNext}
           style={({ pressed }) => [styles.startButton, pressed && styles.pressed]}>
           <Text style={styles.startButtonText}>{nextLabel}</Text>
         </Pressable>

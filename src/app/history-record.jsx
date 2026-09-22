@@ -1,4 +1,5 @@
 import { PokemonColors } from '@/constants/pokemon-theme';
+import { Sounds } from '@/constants/sounds';
 import { getSplitHistory } from '@/utils/split-history';
 import { Link, useLocalSearchParams, useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
@@ -6,12 +7,14 @@ import { ActivityIndicator, Platform, Pressable, ScrollView, StyleSheet, Text, V
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import ReceiptView from '@/components/receipt-view';
+import { useSoundEffect } from '@/hooks/use-sound-effect';
 
 export default function HistoryRecordScreen() {
   const router = useRouter();
   const { id } = useLocalSearchParams();
   const [record, setRecord] = useState(null);
   const [loading, setLoading] = useState(true);
+  const playTap = useSoundEffect(Sounds.tap);
 
   useEffect(() => {
     let cancelled = false;
@@ -58,7 +61,11 @@ export default function HistoryRecordScreen() {
         {!loading && !record && (
           <View style={styles.centerState}>
             <Text style={styles.notFoundText}>This split couldn't be found.</Text>
-            <Pressable onPress={() => router.back()}>
+            <Pressable
+              onPress={() => {
+                router.back();
+                playTap();
+              }}>
               <Text style={styles.notFoundSubtext}>Back to history</Text>
             </Pressable>
           </View>
@@ -75,7 +82,10 @@ export default function HistoryRecordScreen() {
             </ScrollView>
 
             <Pressable
-              onPress={() => router.back()}
+              onPress={() => {
+                router.back();
+                playTap();
+              }}
               style={({ pressed }) => [styles.backButton, pressed && styles.pressed]}
             >
               <Text style={styles.backButtonText}>Back to history</Text>

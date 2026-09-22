@@ -1,18 +1,22 @@
 import { PokemonColors } from '@/constants/pokemon-theme';
+import { Sounds } from '@/constants/sounds';
+import { useSoundEffect } from '@/hooks/use-sound-effect';
 import { useRouter } from 'expo-router';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 const ANDROID_URL = 'https://expo.dev/accounts/deynyel/projects/bill-splitter-pokemon/builds/e79d1841-9de8-4a72-acbc-72e7e2aa27ec';
-const IOS_URL = null; // 
+const IOS_URL = null; //
 
 export default function DownloadScreen() {
   const router = useRouter();
+  const playTap = useSoundEffect(Sounds.tap);
 
   const openLink = (url) => {
-    if (!url) return; 
+    if (!url) return;
 
     window.open(url, '_blank');
+    playTap();
   };
 
   return (
@@ -55,7 +59,10 @@ export default function DownloadScreen() {
         </View>
 
         <Pressable
-          onPress={() => router.back()}
+          onPress={() => {
+            router.back();
+            playTap();
+          }}
           style={({ pressed }) => [styles.backButton, pressed && styles.pressed]}
         >
           <Text style={styles.backButtonText}>Back to the web app</Text>

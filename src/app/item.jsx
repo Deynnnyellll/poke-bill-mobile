@@ -8,6 +8,8 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import ScreenFooter from '@/components/screen-footer';
 import ScreenHeader from '@/components/screen-header';
 import { PokemonColors } from '@/constants/pokemon-theme';
+import { Sounds } from '@/constants/sounds';
+import { useSoundEffect } from '@/hooks/use-sound-effect';
 
 import Modal from '@/components/modal';
 
@@ -17,7 +19,8 @@ export default function ItemScreen() {
   const [itemName, setItemName] = useState('');
   const [price, setPrice] = useState('');
   const [isModal, setIsModal] = useState(false);
-  
+  const playTap = useSoundEffect(Sounds.tap);
+
   const { items, setItems, total, setTotal } = useContext(AppContext);
 
   const DIALOG_TEXT = "Add every line on the bill. Prices get split next.";
@@ -37,10 +40,12 @@ export default function ItemScreen() {
     setItems((prev) => [...prev, { id, name: trimmedName, price: parsedPrice }]);
     setItemName('');
     setPrice('');
+    playTap();
   };
 
   const removeItem = (id) => {
     setItems((prev) => prev.filter((item) => item.id !== id));
+    playTap();
   };
 
   useEffect(() => {

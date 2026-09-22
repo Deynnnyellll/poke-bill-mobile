@@ -2,10 +2,14 @@ import { useEffect, useRef, useState } from 'react';
 import { Animated, Easing, Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { PokemonColors } from '@/constants/pokemon-theme';
+import { Sounds } from '@/constants/sounds';
+import { useSoundEffect } from '@/hooks/use-sound-effect';
 import MetalHuggingRope from './ui/metal-hugging';
 import RopeKnotDragon from './ui/rope-knot-dragon';
 
 export default function Modal(props) {
+  const playTap = useSoundEffect(Sounds.tap);
+
   const fallAnim = useRef(new Animated.Value(-260)).current; // vertical drop-in
   const swingAnim = useRef(new Animated.Value(0)).current;   // pendulum tilt, in degrees
   const [groupHeight, setGroupHeight] = useState(0);
@@ -56,7 +60,7 @@ export default function Modal(props) {
                 }}
               >
                 <View style={styles.illustrationWrap} pointerEvents="none">
-                  {props.metal === false ? <RopeKnotDragon width={120} /> : <MetalHuggingRope  /> }
+                  {props.metal ? <MetalHuggingRope /> : <RopeKnotDragon width={120} />}
                 </View>
 
                 <View style={styles.tag}>
@@ -64,7 +68,10 @@ export default function Modal(props) {
 
                   <Pressable
                     style={({ pressed }) => [styles.closeIcon, pressed && styles.pressed]}
-                    onPress={props.closeModal}
+                    onPress={() => {
+                      props.closeModal();
+                      playTap();
+                    }}
                     hitSlop={10}
                   >
                     <Text style={styles.closeIconText}>✕</Text>

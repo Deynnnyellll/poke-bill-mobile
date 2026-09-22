@@ -1,4 +1,6 @@
 import { PokemonColors } from '@/constants/pokemon-theme';
+import { Sounds } from '@/constants/sounds';
+import { useSoundEffect } from '@/hooks/use-sound-effect';
 import { clearSplitHistory, getSplitHistory } from '@/utils/split-history';
 import { useFocusEffect, useRouter } from 'expo-router';
 import { useCallback, useState } from 'react';
@@ -10,6 +12,7 @@ export default function HistoryDetailScreen() {
   const [records, setRecords] = useState([]);
   const [loading, setLoading] = useState(true);
   const [confirmClear, setConfirmClear] = useState(false);
+  const playTap = useSoundEffect(Sounds.tap);
 
   // Reload every time this screen is focused, so a newly saved split
   // shows up without needing a manual refresh.
@@ -33,6 +36,7 @@ export default function HistoryDetailScreen() {
     await clearSplitHistory();
     setConfirmClear(false);
     setRecords([]);
+    playTap();
   };
 
   const formatDate = (iso) => {
@@ -52,7 +56,10 @@ export default function HistoryDetailScreen() {
 
             {records.length > 0 && (
               <Pressable
-                onPress={() => setConfirmClear(true)}
+                onPress={() => {
+                  setConfirmClear(true);
+                  playTap();
+                }}
                 style={({ pressed }) => [styles.clearButton, pressed && styles.pressed]}
               >
                 <Text style={styles.clearButtonText}>Clear</Text>
@@ -85,9 +92,10 @@ export default function HistoryDetailScreen() {
               return (
                 <Pressable
                   key={item.id}
-                  onPress={() =>
-                    router.push({ pathname: '/history-record', params: { id: item.id } })
-                  }
+                  onPress={() => {
+                    router.push({ pathname: '/history-record', params: { id: item.id } });
+                    playTap();
+                  }}
                   style={({ pressed }) => [styles.recordCard, pressed && styles.pressed]}
                 >
                   <View style={styles.recordHeader}>
@@ -120,7 +128,10 @@ export default function HistoryDetailScreen() {
             </Text>
             <View style={styles.confirmButtons}>
               <Pressable
-                onPress={() => setConfirmClear(false)}
+                onPress={() => {
+                  setConfirmClear(false);
+                  playTap();
+                }}
                 style={({ pressed }) => [styles.cancelButton, pressed && styles.pressed]}
               >
                 <Text style={styles.cancelButtonText}>Cancel</Text>

@@ -8,15 +8,18 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import ScreenFooter from '@/components/screen-footer';
 import ScreenHeader from '@/components/screen-header';
 import { PokemonColors } from '@/constants/pokemon-theme';
+import { Sounds } from '@/constants/sounds';
+import { useSoundEffect } from '@/hooks/use-sound-effect';
 
 import Modal from '@/components/modal';
 
 export default function ItemScreen() {
   const router = useRouter();
-  
+
   const { members, setMembers } = useContext(AppContext);
   const [isFunder, setIsFunder] = useState(null);
   const [isModal, setIsModal] = useState(false);
+  const playTap = useSoundEffect(Sounds.tap);
 
   const DIALOG_TEXT = "Did anyone front the cash for the table?";
   const TYPE_SPEED_MS = 30;
@@ -53,13 +56,19 @@ export default function ItemScreen() {
           <View style={styles.content}>
             <View style={styles.optionRow}>
               <Pressable
-                onPress={() => setIsFunder(true)}
+                onPress={() => {
+                  setIsFunder(true);
+                  playTap();
+                }}
                 style={[styles.option, isFunder === true ? styles.pressed : styles.notPressed]}>
                 <Text style={styles.optionText}>One Person Paid</Text>
               </Pressable>
 
               <Pressable
-                onPress={handleSplitEvenly}
+                onPress={() => {
+                  handleSplitEvenly();
+                  playTap();
+                }}
                 style={[styles.option, isFunder === false ? styles.pressed : styles.notPressed]}>
                 <Text style={styles.optionText}>Split Evenly</Text>
               </Pressable>
@@ -69,7 +78,13 @@ export default function ItemScreen() {
 
             <View style={styles.memberList}>
               {members.map((member, index) => (
-                <Pressable key={member.id} style={({ pressed }) => [styles.memberRow, pressed && styles.selectedFunder]} onPress={() => handleFunder(member.id)}>
+                <Pressable
+                  key={member.id}
+                  style={({ pressed }) => [styles.memberRow, pressed && styles.selectedFunder]}
+                  onPress={() => {
+                    handleFunder(member.id);
+                    playTap();
+                  }}>
                   <View
                     style={[
                       styles.memberAvatar,

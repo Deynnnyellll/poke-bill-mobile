@@ -8,12 +8,15 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import ScreenFooter from '@/components/screen-footer';
 import ScreenHeader from '@/components/screen-header';
 import { PokemonColors } from '@/constants/pokemon-theme';
+import { Sounds } from '@/constants/sounds';
+import { useSoundEffect } from '@/hooks/use-sound-effect';
 
 import Modal from '@/components/modal';
 
 export default function AssignScreen() {
   const router = useRouter();
   const [isModal, setIsModal] = useState(false);
+  const playTap = useSoundEffect(Sounds.tap);
 
   // assignments: { [itemId]: string[] of memberIds sharing that item }
   const { members, setMembers, items, assignments, setAssignments } = useContext(AppContext);
@@ -103,7 +106,10 @@ export default function AssignScreen() {
                     return (
                       <Pressable
                         key={member.id}
-                        onPress={() => toggleAssignment(item.id, member.id)}
+                        onPress={() => {
+                          toggleAssignment(item.id, member.id);
+                          playTap();
+                        }}
                         style={({ pressed }) => [
                           styles.memberPill,
                           {

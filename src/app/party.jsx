@@ -10,6 +10,8 @@ import ScreenHeader from '@/components/screen-header';
 
 import Modal from '@/components/modal';
 import { PokemonColors } from '@/constants/pokemon-theme';
+import { Sounds } from '@/constants/sounds';
+import { useSoundEffect } from '@/hooks/use-sound-effect';
 
 const MEMBER_TYPES = [
   { label: 'Grass', bg: '#B7E4B0', border: '#4C9A4C', text: '#2F6B2F' },
@@ -22,6 +24,7 @@ export default function PartyScreen() {
   const [name, setName] = useState('');
   const { members, setMembers } = useContext(AppContext);
   const [isModal, setIsModal] = useState(false);
+  const playTap = useSoundEffect(Sounds.tap);
 
   const DIALOG_TEXT = "Who's in the party? Everyone gets a type colour.";
   const TYPE_SPEED_MS = 30;
@@ -35,10 +38,12 @@ export default function PartyScreen() {
     const type = MEMBER_TYPES[members.length % MEMBER_TYPES.length];
     setMembers((prev) => [...prev, { id: `${Date.now()}-${prev.length}`, name: trimmed, type }]);
     setName('');
+    playTap();
   };
 
   const removeMember = (id) => {
     setMembers((prev) => prev.filter((member) => member.id !== id));
+    playTap();
   };
 
   return (
