@@ -6,7 +6,7 @@ import { PokemonColors, PokemonTypography } from '@/constants/pokemon-theme';
 import { getDraft } from '@/utils/split-draft';
 
 import FlameCreature from '@/components/ui/flame-type-pet';
-import FlameCreatureTilt from '@/components/ui/flame-type-pet-wave';
+import FlameCreatureTilt from '@/components/ui/flame-type-pet-tilt';
 
 const POSE_INTERVAL_MS = 2000;
 const CROSSFADE_MS = 250;
