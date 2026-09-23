@@ -1,8 +1,12 @@
 import { PokemonColors } from '@/constants/pokemon-theme';
 import LZString from 'lz-string';
 import { useMemo } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { Platform, StyleSheet, Text, View } from 'react-native';
 import QRCode from 'react-native-qrcode-svg';
+
+// Must match app.json's "scheme" and the deployed web build's origin.
+const WEB_APP_URL = 'https://poke-bill-mobile.vercel.app';
+const NATIVE_SCHEME = 'billsplitterpokemon';
 
 // Pure presentational — renders a finished receipt from items/members/total.
 // Used by receipt.jsx (live, from AppContext) and history-detail.jsx
@@ -78,10 +82,11 @@ export default function ReceiptView({ items, members, total, assignments, itemFu
 
   const shareUrl = useMemo(() => {
     const payload = LZString.compressToEncodedURIComponent(
-      JSON.stringify({ items, members, total })
+      JSON.stringify({ items, members, total, assignments, itemFunders })
     );
-    return `billsplitter://import?data=${payload}`;
-  }, [items, members, total]);
+    const base = Platform.OS === 'android' ? `${NATIVE_SCHEME}://` : `${WEB_APP_URL}/`;
+    return `${base}import?data=${payload}`;
+  }, [items, members, total, assignments, itemFunders]);
 
   return (
     <View style={styles.wrap}>

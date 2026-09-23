@@ -1,14 +1,19 @@
 import { useEffect, useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
-import Animated, { SlideInRight } from 'react-native-reanimated';
+import Animated, { FadeIn, FadeOut, SlideInRight } from 'react-native-reanimated';
 
 import { PokemonColors, PokemonTypography } from '@/constants/pokemon-theme';
 import { getDraft } from '@/utils/split-draft';
 
 import FlameCreature from '@/components/ui/flame-type-pet';
+import FlameCreatureTilt from '@/components/ui/flame-type-pet-wave';
+
+const POSE_INTERVAL_MS = 2000;
+const CROSSFADE_MS = 250;
 
 export default function DraftReminderPet({ onResume }) {
   const [draft, setDraft] = useState(null);
+  const [isTilting, setIsTilting] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -21,6 +26,18 @@ export default function DraftReminderPet({ onResume }) {
       cancelled = true;
     };
   }, []);
+
+  // Loop the idle <-> tilt crossfade every 2s for as long as the reminder
+  // (i.e. a draft) is showing.
+  useEffect(() => {
+    if (!draft) return;
+
+    const id = setInterval(() => {
+      setIsTilting((prev) => !prev);
+    }, POSE_INTERVAL_MS);
+
+    return () => clearInterval(id);
+  }, [draft]);
 
   if (!draft) return null;
 
@@ -36,15 +53,32 @@ export default function DraftReminderPet({ onResume }) {
         <View style={styles.bubbleArrow} />
       </View>
 
-      <FlameCreature />
+      <View style={styles.petSlot}>
+        {isTilting ? (
+          <Animated.View key="tilt" entering={FadeIn.duration(CROSSFADE_MS)} exiting={FadeOut.duration(CROSSFADE_MS)}>
+            <FlameCreatureTilt width={120} height={120} />
+          </Animated.View>
+        ) : (
+          <Animated.View key="idle" entering={FadeIn.duration(CROSSFADE_MS)} exiting={FadeOut.duration(CROSSFADE_MS)}>
+            <FlameCreature width={120} height={120} />
+          </Animated.View>
+        )}
+      </View>
     </Animated.View>
   );
 }
 
 const styles = StyleSheet.create({
+  petSlot: {
+    width: 120,
+    height: 120,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   wrapper: {
     position: 'absolute',
-    right: -30,
+    top: "70%",
+    right: 0,
     bottom: 150,
     flexDirection: 'row',
     alignItems: 'center',
@@ -54,11 +88,14 @@ const styles = StyleSheet.create({
     backgroundColor: PokemonColors.dialogBackground,
     borderWidth: 2,
     borderColor: PokemonColors.border,
+    borderBottomWidth: 6,
+    borderRightWidth: 2,
     borderRadius: 14,
     paddingHorizontal: 14,
     paddingVertical: 12,
     maxWidth: 170,
     marginRight: -14,
+    marginTop: -100,
     gap: 8,
   },
   bubbleText: {
@@ -69,7 +106,8 @@ const styles = StyleSheet.create({
   },
   bubbleArrow: {
     position: 'absolute',
-    right: -9,
+    top: 40,
+    right: -10,
     bottom: 18,
     width: 0,
     height: 0,
