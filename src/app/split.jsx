@@ -10,6 +10,7 @@ import ScreenHeader from '@/components/screen-header';
 import { PokemonColors } from '@/constants/pokemon-theme';
 import { Sounds } from '@/constants/sounds';
 import { useSoundEffect } from '@/hooks/use-sound-effect';
+import { saveDraft } from '@/utils/split-draft';
 
 import Modal from '@/components/modal';
 
@@ -19,7 +20,7 @@ export default function AssignScreen() {
   const playTap = useSoundEffect(Sounds.tap);
 
   // assignments: { [itemId]: string[] of memberIds sharing that item }
-  const { members, setMembers, items, assignments, setAssignments } = useContext(AppContext);
+  const { members, setMembers, items, assignments, setAssignments, itemFunders } = useContext(AppContext);
 
   const DIALOG_TEXT = 'Tag everyone who shared each item.';
   const TYPE_SPEED_MS = 30;
@@ -66,6 +67,7 @@ export default function AssignScreen() {
       setIsModal(true);
       return;
     }
+    saveDraft({ members, items, total: billTotal, assignments, itemFunders, step: 4, route: '/receipt' });
     router.push('/receipt');
   };
 

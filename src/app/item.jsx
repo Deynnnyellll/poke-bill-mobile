@@ -10,6 +10,7 @@ import ScreenHeader from '@/components/screen-header';
 import { PokemonColors } from '@/constants/pokemon-theme';
 import { Sounds } from '@/constants/sounds';
 import { useSoundEffect } from '@/hooks/use-sound-effect';
+import { saveDraft } from '@/utils/split-draft';
 
 import Modal from '@/components/modal';
 
@@ -21,7 +22,7 @@ export default function ItemScreen() {
   const [isModal, setIsModal] = useState(false);
   const playTap = useSoundEffect(Sounds.tap);
 
-  const { items, setItems, total, setTotal } = useContext(AppContext);
+  const { members, items, setItems, total, setTotal } = useContext(AppContext);
 
   const DIALOG_TEXT = "Add every line on the bill. Prices get split next.";
   const TYPE_SPEED_MS = 30;
@@ -127,7 +128,10 @@ export default function ItemScreen() {
 
         <ScreenFooter
           nextLabel="Next"
-          onNext={items.length === 0 ? () => setIsModal(prev => !prev) : () => router.push('/assign')}
+          onNext={items.length === 0 ? () => setIsModal(prev => !prev) : () => {
+            saveDraft({ members, items, total, assignments: {}, itemFunders: {}, step: 2, route: '/assign' });
+            router.push('/assign');
+          }}
           onBack={() => router.back()}
         />
       </View>

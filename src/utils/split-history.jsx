@@ -29,12 +29,12 @@ export async function getSplitHistory() {
  * Appends a finished split to history. Call this once, when a split is
  * actually finalized (e.g. when the receipt screen first renders with
  * a complete set of items and assignments) — not on every render.
- * @param {{ items: object[], members: object[], total: number }} split
+ * @param {{ items: object[], members: object[], total: number, assignments: object, itemFunders: object }} split
  */
-export async function saveSplitToHistory({ items, members, total }) {
+export async function saveSplitToHistory({ items, members, total, assignments, itemFunders }) {
   try {
     const existing = await getSplitHistory();
-    const funder = members.find((m) => m.isFunder);
+    const funderIds = members.filter((m) => m.isFunder).map((m) => m.id);
 
     const record = {
       id: `${Date.now()}`,
@@ -42,7 +42,9 @@ export async function saveSplitToHistory({ items, members, total }) {
       total,
       items,
       members,
-      funderId: funder?.id ?? null,
+      assignments: assignments ?? {},
+      itemFunders: itemFunders ?? {},
+      funderIds,
     };
 
     const next = [record, ...existing];

@@ -107,7 +107,10 @@ export default function HistoryDetailScreen() {
             showsVerticalScrollIndicator={false}
           >
             {records.map((item) => {
-              const funder = item.members.find((m) => m.id === item.funderId);
+              const funderIds = item.funderIds ?? (item.funderId ? [item.funderId] : []);
+              const funderNames = item.members
+                .filter((m) => funderIds.includes(m.id))
+                .map((m) => m.name);
               return (
                 <Pressable
                   key={item.id}
@@ -125,7 +128,7 @@ export default function HistoryDetailScreen() {
                   <Text style={styles.recordMeta}>
                     {item.items.length} item{item.items.length !== 1 ? 's' : ''} ·{' '}
                     {item.members.length} trainer{item.members.length !== 1 ? 's' : ''}
-                    {funder ? ` · ${funder.name} fronted it` : ''}
+                    {funderNames.length > 0 ? ` · ${funderNames.join(' & ')} fronted it` : ''}
                   </Text>
 
                   <Text style={styles.recordChevron}>View receipt →</Text>

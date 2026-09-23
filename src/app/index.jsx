@@ -3,6 +3,7 @@ import { useRouter } from 'expo-router';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import DraftReminderPet from '@/components/draft-reminder-pet';
 import Modal from '@/components/modal';
 import ScreenFooter from '@/components/screen-footer';
 import ScreenHeader from '@/components/screen-header';
@@ -16,7 +17,15 @@ export default function HomeScreen() {
   // this is for useTyper
   const DIALOG_TEXT = "A wild BILL appeared! Log the items and we'll split it.";
   const TYPE_SPEED_MS = 30;
-  const { setTotal, setMembers, setItems, splitCompleted, setSplitCompleted } = useContext(AppContext);
+  const {
+    setTotal,
+    setMembers,
+    setItems,
+    setAssignments,
+    setItemFunders,
+    splitCompleted,
+    setSplitCompleted,
+  } = useContext(AppContext);
   const playTap = useSoundEffect(Sounds.tap);
   const [isCompleteModal, setIsCompleteModal] = useState(false);
 
@@ -29,12 +38,23 @@ export default function HomeScreen() {
     setTotal(0);
     setMembers([]);
     setItems([]);
+    setAssignments({});
+    setItemFunders({});
 
     if (splitCompleted) {
       setIsCompleteModal(true);
       setSplitCompleted(false);
     }
   }, [])
+
+  const handleResumeDraft = (draft) => {
+    setMembers(draft.members ?? []);
+    setItems(draft.items ?? []);
+    setTotal(draft.total ?? 0);
+    setAssignments(draft.assignments ?? {});
+    setItemFunders(draft.itemFunders ?? {});
+    router.push(draft.route);
+  };
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -104,6 +124,8 @@ export default function HomeScreen() {
         thunder={true}
         closeModal={() => setIsCompleteModal(false)}
       />
+
+      <DraftReminderPet onResume={handleResumeDraft} />
     </SafeAreaView>
   );
 }

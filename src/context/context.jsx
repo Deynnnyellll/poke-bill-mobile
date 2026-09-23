@@ -6,11 +6,12 @@ export const AppProvider = ({ children }) => {
     const [members, setMembers] = useState([]);
     const [items, setItems] = useState([]);
     const [assignments, setAssignments] = useState({});
+    const [itemFunders, setItemFunders] = useState({});
     const [total, setTotal] = useState(0);
     const [splitCompleted, setSplitCompleted] = useState(false);
 
     return (
-        <AppContext value={{members, setMembers, items, setItems, total, setTotal, assignments, setAssignments, splitCompleted, setSplitCompleted}}>
+        <AppContext value={{members, setMembers, items, setItems, total, setTotal, assignments, setAssignments, itemFunders, setItemFunders, splitCompleted, setSplitCompleted}}>
             {children}
         </AppContext>
     )

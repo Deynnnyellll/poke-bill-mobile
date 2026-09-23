@@ -78,7 +78,13 @@ export default function HistoryRecordScreen() {
               contentContainerStyle={styles.contentInner}
               showsVerticalScrollIndicator={false}
             >
-              <ReceiptView items={record.items} members={record.members} total={record.total} />
+              <ReceiptView
+                items={record.items}
+                members={record.members}
+                total={record.total}
+                assignments={record.assignments}
+                itemFunders={record.itemFunders}
+              />
             </ScrollView>
 
             <Pressable

@@ -12,6 +12,7 @@ import Modal from '@/components/modal';
 import { PokemonColors } from '@/constants/pokemon-theme';
 import { Sounds } from '@/constants/sounds';
 import { useSoundEffect } from '@/hooks/use-sound-effect';
+import { saveDraft } from '@/utils/split-draft';
 
 const MEMBER_TYPES = [
   { label: 'Grass', bg: '#B7E4B0', border: '#4C9A4C', text: '#2F6B2F' },
@@ -115,7 +116,10 @@ export default function PartyScreen() {
 
         <ScreenFooter
           nextLabel="Next"
-          onNext={members.length <= 1 ? () => setIsModal(prev => !prev) : () => router.push('/item')}
+          onNext={members.length <= 1 ? () => setIsModal(prev => !prev) : () => {
+            saveDraft({ members, items: [], total: 0, assignments: {}, itemFunders: {}, step: 1, route: '/item' });
+            router.push('/item');
+          }}
           onBack={() => router.back()}
         />
 

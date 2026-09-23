@@ -11,6 +11,7 @@ import { PokemonColors } from '@/constants/pokemon-theme';
 
 import Modal from '@/components/modal';
 import ReceiptView from '@/components/receipt-view';
+import { clearDraft } from '@/utils/split-draft';
 import { saveSplitToHistory } from '@/utils/split-history';
 
 export default function AssignScreen() {
@@ -20,7 +21,19 @@ export default function AssignScreen() {
   const [saveFailed, setSaveFailed] = useState(false);
   const [saving, setSaving] = useState(false);
 
-  const { items, members ,total, setItems, setMembers, setAssignments, setTotal, setSplitCompleted } = useContext(AppContext);
+  const {
+    items,
+    members,
+    total,
+    assignments,
+    itemFunders,
+    setItems,
+    setMembers,
+    setAssignments,
+    setItemFunders,
+    setTotal,
+    setSplitCompleted,
+  } = useContext(AppContext);
 
   const DIALOG_TEXT = 'Everyone share is set. You can tap share to send it around.';
   const TYPE_SPEED_MS = 30;
@@ -30,7 +43,7 @@ export default function AssignScreen() {
   const handleSave = async () => {
     if (saving) return;
     setSaving(true);
-    const result = await saveSplitToHistory({ items, members, total });
+    const result = await saveSplitToHistory({ items, members, total, assignments, itemFunders });
     setSaving(false);
 
     // saveSplitToHistory returns the saved record on success, or null if the
@@ -47,9 +60,12 @@ export default function AssignScreen() {
   const closeReceiptModal = () => {
     setIsReceiptModal(false);
     setTimeout(() => {
+      clearDraft();
       setTotal(0);
       setMembers([]);
       setItems([]);
+      setAssignments({});
+      setItemFunders({});
       setSplitCompleted(true);
       router.push("./");
     }, 500);
@@ -75,7 +91,13 @@ export default function AssignScreen() {
           contentContainerStyle={styles.contentInner}
           showsVerticalScrollIndicator={false}
         >
-          <ReceiptView items={items} members={members} total={total} />
+          <ReceiptView
+            items={items}
+            members={members}
+            total={total}
+            assignments={assignments}
+            itemFunders={itemFunders}
+          />
         </ScrollView>
 
         <ScreenFooter
