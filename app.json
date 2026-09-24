@@ -42,13 +42,8 @@
       ],
       "expo-audio",
       [
-        "expo-media-library",
-        {
-          "savePhotosPermission": "Allow Bill Splitter to save receipts to your Photos."
-        }
-      ],
-      "expo-image",
-      "expo-web-browser"
+        "expo-media-library", {"savePhotosPermission": "Allow Bill Splitter to save receipts to your Photos."}
+      ]
     ],
     "experiments": {
       "typedRoutes": true,
