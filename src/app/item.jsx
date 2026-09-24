@@ -132,7 +132,7 @@ export default function ItemScreen() {
             saveDraft({ members, items, total, assignments: {}, itemFunders: {}, step: 2, route: '/assign' });
             router.push('/assign');
           }}
-          onBack={() => router.back()}
+          onBack={() => router.push("/party")}
         />
       </View>
 

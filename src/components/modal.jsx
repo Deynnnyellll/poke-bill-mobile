@@ -1,5 +1,13 @@
 import { useEffect, useRef, useState } from 'react';
-import { Animated, Easing, Pressable, StyleSheet, Text, View } from 'react-native';
+import {
+  Animated,
+  Easing,
+  Pressable,
+  Modal as RNModal,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
 
 import { PokemonColors } from '@/constants/pokemon-theme';
 import { Sounds } from '@/constants/sounds';
@@ -39,71 +47,88 @@ export default function Modal(props) {
     });
   }, [props.isModal]);
 
+  // Hinges the swing at the top of the group (where the rope is)
   const pivotShift = groupHeight / 2;
   const rotate = swingAnim.interpolate({
     inputRange: [-15, 15],
     outputRange: ['-15deg', '15deg'],
   });
 
+  const handleClose = () => {
+    props.closeModal();
+    playTap();
+  };
+
   return (
-    <>
-      {props.isModal && (
-        <View style={styles.overlay}>
-          <Animated.View style={{ transform: [{ translateY: fallAnim }] }}>
-            <View onLayout={(e) => setGroupHeight(e.nativeEvent.layout.height)}>
-              <Animated.View
-                style={{
+    <RNModal
+      visible={!!props.isModal}
+      transparent
+      animationType="none" // our own drop + swing handles the animation
+      statusBarTranslucent
+      onRequestClose={handleClose} // Android back button
+    >
+      <View style={styles.overlay}>
+        <Animated.View style={[styles.stage, { transform: [{ translateY: fallAnim }] }]}>
+          <View
+            style={styles.stage}
+            onLayout={(e) => setGroupHeight(e.nativeEvent.layout.height)}
+          >
+            <Animated.View
+              style={[
+                styles.stage,
+                {
                   transform: [
                     { translateY: -pivotShift },
                     { rotate },
                     { translateY: pivotShift },
                   ],
-                }}
-              >
-                <View style={styles.illustrationWrap} pointerEvents="none">
-                  {props.thunder ? (
-                    <ThunderPetHugging width={120} />
-                  ) : props.metal ? (
-                    <MetalHuggingRope />
-                  ) : (
-                    <RopeKnotDragon width={120} />
-                  )}
-                </View>
+                },
+              ]}
+            >
+              <View style={styles.illustrationWrap} pointerEvents="none">
+                {props.thunder ? (
+                  <ThunderPetHugging width={120} />
+                ) : props.metal ? (
+                  <MetalHuggingRope />
+                ) : (
+                  <RopeKnotDragon width={120} />
+                )}
+              </View>
 
-                <View style={styles.tag}>
-                  <View style={styles.holeDot} />
+              <View style={styles.tag}>
+                <View style={styles.holeDot} />
 
-                  <Pressable
-                    style={({ pressed }) => [styles.closeIcon, pressed && styles.pressed]}
-                    onPress={() => {
-                      props.closeModal();
-                      playTap();
-                    }}
-                    hitSlop={10}
-                  >
-                    <Text style={styles.closeIconText}>✕</Text>
-                  </Pressable>
+                <Pressable
+                  style={({ pressed }) => [styles.closeIcon, pressed && styles.pressed]}
+                  onPress={handleClose}
+                  hitSlop={10}
+                >
+                  <Text style={styles.closeIconText}>✕</Text>
+                </Pressable>
 
-                  {!!props.title && <Text style={styles.titleText}>{props.title}</Text>}
+                {!!props.title && <Text style={styles.titleText}>{props.title}</Text>}
 
-                  <Text style={styles.dialogText}>{props.text}</Text>
-                </View>
-              </Animated.View>
-            </View>
-          </Animated.View>
-        </View>
-      )}
-    </>
+                <Text style={styles.dialogText}>{props.text}</Text>
+              </View>
+            </Animated.View>
+          </View>
+        </Animated.View>
+      </View>
+    </RNModal>
   );
 }
 
 const styles = StyleSheet.create({
   overlay: {
-    ...StyleSheet.absoluteFill,
+    flex: 1, // RNModal is already full-screen, so this fills the whole screen
     backgroundColor: 'rgba(0, 0, 0, 0.3)',
     justifyContent: 'center',
     alignItems: 'center',
-    zIndex: 10000,
+  },
+  stage: {
+    // Full-width wrappers so the tag's % width is measured against the screen
+    width: '100%',
+    alignItems: 'center',
   },
   illustrationWrap: {
     alignItems: 'center',
@@ -111,8 +136,8 @@ const styles = StyleSheet.create({
   },
   tag: {
     backgroundColor: PokemonColors.cream,
-    width: 300,
-    maxWidth: '85%',
+    width: '85%',
+    maxWidth: 300,
     minHeight: 200,
     borderWidth: 2,
     borderColor: PokemonColors.border,

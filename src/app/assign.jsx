@@ -36,9 +36,21 @@ export default function ItemScreen() {
   const toggleFunder = (id) => {
     if (!isFunder) return;
 
+    const singleFunder = items.length === 1;
     const turningOff = members.find((member) => member.id === id)?.isFunder === true;
 
-    setMembers((prev) => prev.map((member) => (member.id === id ? { ...member, isFunder: !member.isFunder } : member)));
+    setMembers((prev) => 
+      prev.map((member) => {
+        if(member.id === id) return { ...member, isFunder: !member.isFunder };
+
+        return singleFunder? {...member, isFunder: false} : member;
+      }
+    ));
+
+    if(singleFunder) {
+      setItemFunders({});
+      return;
+    }
 
     if (turningOff) {
       setItemFunders((prev) => {
@@ -86,7 +98,7 @@ export default function ItemScreen() {
       }
       return;
     }
-    router.back();
+    router.push("/item");
   };
 
   const handleNext = () => {
@@ -201,7 +213,7 @@ export default function ItemScreen() {
                       playTap();
                     }}
                     style={[styles.option, isFunder === true ? styles.pressed : styles.notPressed]}>
-                    <Text style={styles.optionText}>One Person Paid</Text>
+                    <Text style={styles.optionText}>Someone Paid</Text>
                   </Pressable>
 
                   <Pressable
@@ -213,8 +225,13 @@ export default function ItemScreen() {
                     <Text style={styles.optionText}>Split Evenly</Text>
                   </Pressable>
                 </View>
-
-                <Text style={styles.metaText}>PICK THE FUNDER{selectedFunders.length > 1 ? 'S' : ''}</Text>
+                <Text style={styles.metaText}>
+                  { 
+                  isFunder ? (items.length === 1 ?
+                  'PICK THE FUNDER (ONLY ONE ITEM)' :
+                  `PICK THE FUNDER${selectedFunders.length > 1 ? 'S' : ''}`) : "ITEMS WILL SPLIT EVENLY"
+                  }
+                </Text>
 
                 <View style={styles.memberList}>
                   {members.map((member, index) =>

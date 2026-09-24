@@ -103,7 +103,7 @@ export default function AssignScreen() {
         <ScreenFooter
           nextLabel={saving ? 'Saving…' : 'Save the receipt'}
           onNext={handleSave}
-          onBack={() => router.back()}
+          onBack={() => router.push("/split")}
         />
       </View>
 

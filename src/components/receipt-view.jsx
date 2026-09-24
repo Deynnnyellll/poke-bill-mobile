@@ -1,28 +1,68 @@
 import { PokemonColors } from '@/constants/pokemon-theme';
 import LZString from 'lz-string';
-import { useMemo } from 'react';
-import { Platform, StyleSheet, Text, View } from 'react-native';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import {
+  Alert,
+  Animated,
+  Easing,
+  Modal,
+  Platform,
+  Pressable,
+  Share,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
 import QRCode from 'react-native-qrcode-svg';
 
-// Must match app.json's "scheme" and the deployed web build's origin.
+// url for redirect
 const WEB_APP_URL = 'https://poke-bill-mobile.vercel.app';
 const NATIVE_SCHEME = 'billsplitterpokemon';
 
-// Pure presentational — renders a finished receipt from items/members/total.
-// Used by receipt.jsx (live, from AppContext) and history-detail.jsx
-// (from a saved AsyncStorage record), so both look exactly the same.
-//
-// `assignments` ({ [itemId]: memberId[] }, who shared each item) and
-// `itemFunders` ({ [itemId]: funderId }, who paid for each item) are optional:
-// records saved before multi-funder support won't have them, in which case a
-// single funder's precomputed `totalOwed` is used as a fallback.
+// Cross-platform toast-ish message
+function notify(title, message) {
+  if (Platform.OS === 'web') {
+    window.alert(message ? `${title}\n${message}` : title);
+  } else {
+    Alert.alert(title, message);
+  }
+}
+
 export default function ReceiptView({ items, members, total, assignments, itemFunders }) {
   const funders = useMemo(() => members.filter((m) => m.isFunder), [members]);
   const hasItemFunderMap = !!itemFunders && Object.keys(itemFunders).length > 0;
 
-  // Debt ledger: { [sharerId]: { [funderId]: amount } } — what each
-  // non-funder member owes, broken down by which funder paid for the items
-  // they consumed.
+  const [isShare, setIsShare] = useState(false);
+  const [busy, setBusy] = useState(null); // 'download' | 'code' | null
+  const receiptRef = useRef(null);
+
+  // ---- Bottom sheet animation ----
+  const slide = useRef(new Animated.Value(0)).current; // 0 = hidden, 1 = shown
+  const [sheetMounted, setSheetMounted] = useState(false);
+
+  useEffect(() => {
+    if (isShare) {
+      setSheetMounted(true);
+      Animated.timing(slide, {
+        toValue: 1,
+        duration: 280,
+        easing: Easing.out(Easing.cubic),
+        useNativeDriver: Platform.OS !== 'web',
+      }).start();
+    } else if (sheetMounted) {
+      Animated.timing(slide, {
+        toValue: 0,
+        duration: 220,
+        easing: Easing.in(Easing.cubic),
+        useNativeDriver: Platform.OS !== 'web',
+      }).start(() => setSheetMounted(false));
+    }
+  }, [isShare]);
+
+  const sheetTranslate = slide.interpolate({ inputRange: [0, 1], outputRange: [500, 0] });
+  const backdropOpacity = slide.interpolate({ inputRange: [0, 1], outputRange: [0, 0.5] });
+
+  // ---- Calculations (unchanged) ----
   const debts = useMemo(() => {
     const map = {};
     if (funders.length === 0) return map;
@@ -80,106 +120,245 @@ export default function ReceiptView({ items, members, total, assignments, itemFu
     ? members.filter((m) => !funders.some((f) => f.id === m.id))
     : members;
 
-  const shareUrl = useMemo(() => {
-    const payload = LZString.compressToEncodedURIComponent(
+  // ---- Share payloads ----
+  const sharePayload = useMemo(
+    () => LZString.compressToEncodedURIComponent(
       JSON.stringify({ items, members, total, assignments, itemFunders })
-    );
+    ),
+    [items, members, total, assignments, itemFunders]
+  );
+
+  const shareUrl = useMemo(() => {
     const base = Platform.OS === 'android' ? `${NATIVE_SCHEME}://` : `${WEB_APP_URL}/`;
-    return `${base}import?data=${payload}`;
-  }, [items, members, total, assignments, itemFunders]);
+    return `${base}import?data=${sharePayload}`;
+  }, [sharePayload]);
+
+  const copyCode = async (code) => {
+    const Clipboard = await import('expo-clipboard');
+    await Clipboard.setStringAsync(code);
+    notify('Code copied', 'Paste it into Import in Bill Splitter.');
+  };
+
+  const handleDownload = async () => {
+    if (busy) return;
+    setBusy('download');
+    const fileName = `receipt-${Date.now()}.png`;
+
+    try {
+      if (Platform.OS === 'web') {
+        const html2canvas = (await import('html2canvas')).default;
+        const node = document.getElementById('receipt-capture');
+        const canvas = await html2canvas(node, { backgroundColor: null, scale: 2 });
+        const blob = await new Promise((res) => canvas.toBlob(res, 'image/png'));
+        const file = new File([blob], fileName, { type: 'image/png' });
+
+        if (navigator.canShare && navigator.canShare({ files: [file] })) {
+          await navigator.share({ files: [file], title: 'Bill receipt' });
+        } else {
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = fileName;
+          document.body.appendChild(a);
+          a.click();
+          a.remove();
+          setTimeout(() => URL.revokeObjectURL(url), 1000);
+        }
+        return;
+      }
+
+      const MediaLibrary = await import('expo-media-library');
+      const { captureRef } = await import('react-native-view-shot');
+
+      const { status } = await MediaLibrary.requestPermissionsAsync(true);
+      if (status !== 'granted') {
+        notify('Permission needed', 'Allow photo access to save the receipt.');
+        return;
+      }
+      const uri = await captureRef(receiptRef, { format: 'png', quality: 1, result: 'tmpfile' });
+      await MediaLibrary.saveToLibraryAsync(uri);
+      notify('Receipt saved', 'You can find it in your Photos.');
+    } catch (err) {
+      if (err?.name !== 'AbortError') {
+        console.error(err);
+        notify('Could not save receipt', 'Try again in a moment.');
+      }
+    } finally {
+      setBusy(null);
+    }
+  };
+
+  const handleShareCode = async () => {
+    if (busy) return;
+    setBusy('code');
+    try {
+      if (Platform.OS === 'web') {
+        if (navigator.share) {
+          await navigator.share({ title: 'Bill Splitter code', text: sharePayload });
+        } else {
+          await copyCode(sharePayload);
+        }
+        return;
+      }
+      await Share.share({ message: sharePayload });
+    } catch (err) {
+      if (err?.name !== 'AbortError') await copyCode(sharePayload);
+    } finally {
+      setBusy(null);
+    }
+  };
 
   return (
     <View style={styles.wrap}>
-      <View style={styles.itemList}>
-        <Text style={[styles.metaText, { marginBottom: 10 }]}>
-          ITEMS · {items.length} LOGGED
-        </Text>
-        {items.map((item) => (
-          <View key={item.id}>
-            <View style={styles.itemRow}>
-              <Text style={styles.itemName}>{item.name}</Text>
-              <Text style={styles.itemPrice}>₱{item.price}</Text>
+      {/* Everything inside this View is what gets saved as the PNG */}
+      <View ref={receiptRef} nativeID='receipt-capture' collapsable={false} style={styles.captureArea}>
+        <View style={styles.itemList}>
+          <Text style={[styles.metaText, { marginBottom: 10 }]}>
+            ITEMS · {items.length} LOGGED
+          </Text>
+          {items.map((item) => (
+            <View key={item.id}>
+              <View style={styles.itemRow}>
+                <Text style={styles.itemName}>{item.name}</Text>
+                <Text style={styles.itemPrice}>₱{item.price}</Text>
+              </View>
+              <View style={styles.dashedBorder} />
             </View>
-            <View style={styles.dashedBorder} />
-          </View>
-        ))}
-      </View>
-
-      {/* Funder banner(s) — only rendered when someone actually fronted the bill */}
-      {funders.map((f) => (
-        <View key={f.id} style={styles.funderBanner}>
-          <Text style={styles.funderCrown}>👑</Text>
-          <View style={{ flex: 1 }}>
-            <Text style={styles.funderTitle}>{f.name} fronted ₱{amountFundedBy[f.id] ?? 0}</Text>
-            <Text style={styles.funderSubtitle}>ALREADY PAID · NO IOU</Text>
-          </View>
+          ))}
         </View>
-      ))}
-
-      <View style={styles.summaryBox}>
-        <Text style={styles.summaryLabel}>
-          {funders.length === 0
-            ? 'EACH PAYS'
-            : funders.length === 1
-              ? `OWES ${funders[0].name.toUpperCase()}`
-              : 'WHO OWES WHOM'}
-        </Text>
-
-        {summaryMembers.map((member) => {
-          const memberDebts = debts[member.id] ?? {};
-          const owed = funders.length > 0
-            ? Object.values(memberDebts).reduce((sum, amount) => sum + amount, 0)
-            : (member.totalOwed ?? 0);
-          const fraction = total > 0 ? owed / total : 0;
-          return (
-            <View key={member.id} style={styles.summaryRow}>
-              <View style={styles.summaryTextRow}>
-                <Text style={styles.summaryName}>{member.name}</Text>
-                <Text style={styles.summaryAmount}>₱{owed}</Text>
-              </View>
-              {funders.length > 1 && Object.keys(memberDebts).length > 0 && (
-                <View style={{ gap: 2 }}>
-                  {Object.entries(memberDebts).map(([funderId, amount]) => {
-                    const owedFunder = members.find((m) => m.id === funderId);
-                    return (
-                      <Text key={funderId} style={styles.summarySubtext}>
-                        ₱{amount} to {owedFunder?.name ?? 'unknown'}
-                      </Text>
-                    );
-                  })}
-                </View>
-              )}
-              <View style={styles.progressTrack}>
-                <View
-                  style={[
-                    styles.progressFill,
-                    {
-                      width: `${Math.min(fraction * 100, 100)}%`,
-                      backgroundColor: member.type.border,
-                    },
-                  ]}
-                />
-              </View>
-            </View>
-          );
-        })}
 
         {funders.map((f) => (
-          <View key={f.id} style={styles.totalOwedRow}>
-            <Text style={styles.totalOwedLabel}>Total owed to {f.name}</Text>
-            <Text style={styles.totalOwedAmount}>₱{totalOwedByFunder[f.id] ?? 0}</Text>
+          <View key={f.id} style={styles.funderBanner}>
+            <Text style={styles.funderCrown}>👑</Text>
+            <View style={{ flex: 1 }}>
+              <Text style={styles.funderTitle}>{f.name} fronted ₱{amountFundedBy[f.id] ?? 0}</Text>
+              <Text style={styles.funderSubtitle}>TO BE PAID</Text>
+            </View>
           </View>
         ))}
+
+        <View style={styles.summaryBox}>
+          <Text style={styles.summaryLabel}>
+            {funders.length === 0
+              ? 'EACH PAYS'
+              : funders.length === 1
+                ? `OWES ${funders[0].name.toUpperCase()}`
+                : 'WHO OWES WHOM'}
+          </Text>
+
+          {summaryMembers.map((member) => {
+            const memberDebts = debts[member.id] ?? {};
+            const owed = funders.length > 0
+              ? Object.values(memberDebts).reduce((sum, amount) => sum + amount, 0)
+              : (member.totalOwed ?? 0);
+            const fraction = total > 0 ? owed / total : 0;
+            return (
+              <View key={member.id} style={styles.summaryRow}>
+                <View style={styles.summaryTextRow}>
+                  <Text style={styles.summaryName}>{member.name}</Text>
+                  <Text style={styles.summaryAmount}>₱{owed}</Text>
+                </View>
+                {funders.length > 1 && Object.keys(memberDebts).length > 0 && (
+                  <View style={{ gap: 2 }}>
+                    {Object.entries(memberDebts).map(([funderId, amount]) => {
+                      const owedFunder = members.find((m) => m.id === funderId);
+                      return (
+                        <Text key={funderId} style={styles.summarySubtext}>
+                          ₱{amount} to {owedFunder?.name ?? 'unknown'}
+                        </Text>
+                      );
+                    })}
+                  </View>
+                )}
+                <View style={styles.progressTrack}>
+                  <View
+                    style={[
+                      styles.progressFill,
+                      {
+                        width: `${Math.min(fraction * 100, 100)}%`,
+                        backgroundColor: member.type.border,
+                      },
+                    ]}
+                  />
+                </View>
+              </View>
+            );
+          })}
+
+          {funders.map((f) => (
+            <View key={f.id} style={styles.totalOwedRow}>
+              <Text style={styles.totalOwedLabel}>Total owed to {f.name}</Text>
+              <Text style={styles.totalOwedAmount}>₱{totalOwedByFunder[f.id] ?? 0}</Text>
+            </View>
+          ))}
+        </View>
       </View>
 
-      {/* Share stub */}
-      <View style={styles.shareStub}>
-        <View style={styles.shareNotchLeft} />
-        <View style={styles.shareNotchRight} />
-        <QRCode value={shareUrl} size={110} backgroundColor={PokemonColors.contentBackground} />
-        <Text style={styles.shareLabel}>Scan with your Camera app</Text>
-        <Text style={styles.shareHint}>opens straight into Bill Splitter</Text>
+      {/* Actions */}
+      <View style={styles.actions}>
+        <Pressable
+          style={({ pressed }) => [styles.primaryBtn, pressed && styles.pressed]}
+          onPress={() => setIsShare(true)}
+        >
+          <Text style={styles.primaryBtnText}>Share QR code</Text>
+        </Pressable>
+
+        <View style={styles.secondaryRow}>
+          <Pressable
+            style={({ pressed }) => [styles.secondaryBtn, pressed && styles.pressed, busy && styles.disabled]}
+            onPress={handleDownload}
+            disabled={!!busy}
+          >
+            <Text style={styles.secondaryBtnText}>
+              {busy === 'download' ? 'Saving…' : 'Save as image'}
+            </Text>
+          </Pressable>
+
+          <Pressable
+            style={({ pressed }) => [styles.secondaryBtn, pressed && styles.pressed, busy && styles.disabled]}
+            onPress={handleShareCode}
+            disabled={!!busy}
+          >
+            <Text style={styles.secondaryBtnText}>
+              {busy === 'code' ? 'Sharing…' : 'Share as code'}
+            </Text>
+          </Pressable>
+        </View>
       </View>
+
+      {/* QR bottom sheet */}
+      <Modal
+        visible={sheetMounted}
+        transparent
+        animationType="none"
+        onRequestClose={() => setIsShare(false)}
+        statusBarTranslucent
+      >
+        <View style={styles.modalRoot}>
+          <Animated.View style={[styles.backdrop, { opacity: backdropOpacity }]}>
+            <Pressable style={StyleSheet.absoluteFill} onPress={() => setIsShare(false)} />
+          </Animated.View>
+
+          <Animated.View style={[styles.sheet, { transform: [{ translateY: sheetTranslate }] }]}>
+            <View style={styles.sheetHandle} />
+
+            <View style={styles.shareStub}>
+              <View style={styles.shareNotchLeft} />
+              <View style={styles.shareNotchRight} />
+              <QRCode value={shareUrl} size={180} backgroundColor={PokemonColors.screenBackground} />
+              <Text style={styles.shareLabel}>Scan with your Camera app</Text>
+              <Text style={styles.shareHint}>opens straight into Bill Splitter</Text>
+            </View>
+
+            <Pressable
+              style={({ pressed }) => [styles.secondaryBtn, pressed && styles.pressed]}
+              onPress={() => setIsShare(false)}
+            >
+              <Text style={styles.secondaryBtnText}>Done</Text>
+            </Pressable>
+          </Animated.View>
+        </View>
+      </Modal>
     </View>
   );
 }
@@ -187,6 +366,13 @@ export default function ReceiptView({ items, members, total, assignments, itemFu
 const styles = StyleSheet.create({
   wrap: {
     gap: 14,
+  },
+  captureArea: {
+    gap: 14,
+    padding: 12,
+    borderRadius: 16,
+    // Solid background so the PNG isn't transparent
+    backgroundColor: PokemonColors.contentBackground ?? '#FFFFFF',
   },
   itemRow: {
     padding: 4,
@@ -226,9 +412,7 @@ const styles = StyleSheet.create({
     borderRadius: 14,
     padding: 14,
   },
-  funderCrown: {
-    fontSize: 24,
-  },
+  funderCrown: { fontSize: 24 },
   funderTitle: {
     fontSize: 15,
     fontWeight: '800',
@@ -254,23 +438,13 @@ const styles = StyleSheet.create({
     letterSpacing: 1,
     color: PokemonColors.yellow,
   },
-  summaryRow: {
-    gap: 6,
-  },
+  summaryRow: { gap: 6 },
   summaryTextRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
   },
-  summaryName: {
-    fontSize: 15,
-    fontWeight: '700',
-    color: '#FFFFFF',
-  },
-  summaryAmount: {
-    fontSize: 15,
-    fontWeight: '700',
-    color: '#FFFFFF',
-  },
+  summaryName: { fontSize: 15, fontWeight: '700', color: '#FFFFFF' },
+  summaryAmount: { fontSize: 15, fontWeight: '700', color: '#FFFFFF' },
   summarySubtext: {
     fontSize: 12,
     fontWeight: '600',
@@ -282,10 +456,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(255,255,255,0.15)',
     overflow: 'hidden',
   },
-  progressFill: {
-    height: '100%',
-    borderRadius: 3,
-  },
+  progressFill: { height: '100%', borderRadius: 3 },
   totalOwedRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -293,17 +464,75 @@ const styles = StyleSheet.create({
     borderTopColor: 'rgba(255,255,255,0.15)',
     paddingTop: 12,
   },
-  totalOwedLabel: {
-    fontSize: 14,
-    fontWeight: '700',
-    color: PokemonColors.yellow,
+  totalOwedLabel: { fontSize: 14, fontWeight: '700', color: PokemonColors.yellow },
+  totalOwedAmount: { fontSize: 14, fontWeight: '800', color: PokemonColors.yellow },
+
+  // ---- Action buttons ----
+  actions: { gap: 10 },
+  primaryBtn: {
+    backgroundColor: PokemonColors.yellow,
+    borderWidth: 2,
+    borderColor: PokemonColors.border,
+    borderRadius: 14,
+    paddingVertical: 14,
+    alignItems: 'center',
   },
-  totalOwedAmount: {
+  primaryBtnText: {
+    fontSize: 16,
+    fontWeight: '800',
+    color: PokemonColors.bodyText,
+  },
+  secondaryRow: { 
+    flexDirection: 'row', 
+    gap: 10 
+  },
+  secondaryBtn: {
+    flex: 1,
+    backgroundColor: PokemonColors.screenBackground,
+    borderWidth: 2,
+    borderColor: PokemonColors.border,
+    borderRadius: 14,
+    paddingVertical: 12,
+    alignItems: 'center',
+  },
+  secondaryBtnText: {
     fontSize: 14,
     fontWeight: '800',
-    color: PokemonColors.yellow,
+    color: PokemonColors.bodyText,
   },
+  pressed: { transform: [{ translateY: 2 }], opacity: 0.9 },
+  disabled: { opacity: 0.5 },
 
+  // ---- Bottom sheet ----
+  modalRoot: { flex: 1, justifyContent: 'flex-end' },
+  backdrop: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: '#000',
+  },
+  sheet: {
+    backgroundColor: PokemonColors.cream,
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    borderWidth: 2,
+    borderBottomWidth: 0,
+    borderColor: PokemonColors.border,
+    paddingHorizontal: 20,
+    paddingTop: 10,
+    paddingBottom: 32,
+    gap: 16,
+    width: '100%',
+    maxWidth: 520,
+    alignSelf: 'center',
+  },
+  sheetHandle: {
+    alignSelf: 'center',
+    width: 44,
+    height: 5,
+    borderRadius: 3,
+    backgroundColor: PokemonColors.border,
+    opacity: 0.4,
+    marginBottom: 4,
+  },
   shareStub: {
     alignItems: 'center',
     gap: 6,

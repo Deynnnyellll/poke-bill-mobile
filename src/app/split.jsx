@@ -176,7 +176,7 @@ export default function AssignScreen() {
         <ScreenFooter
           nextLabel="See the receipt"
           onNext={handleNext}
-          onBack={() => router.back()}
+          onBack={() => router.push("/assign")}
         />
       </View>
 
